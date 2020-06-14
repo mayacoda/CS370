@@ -45,7 +45,6 @@ export class Game extends GameCycleEntity {
     }
 
     start() {
-        this.currentScene.start();
         this.renderEngine.start();
     }
 

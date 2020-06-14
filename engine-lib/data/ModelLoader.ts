@@ -1,9 +1,20 @@
 import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader'
 import {FBXLoader} from 'three/examples/jsm/loaders/FBXLoader'
-import {GLTFLoader, GLTF} from 'three/examples/jsm/loaders/GLTFLoader'
+import {MTLLoader} from 'three/examples/jsm/loaders/MTLLoader'
+import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
 import {AcceptedModelExtensions, getExtension, isAcceptedModelExtension} from "../utilities";
-import {Group} from 'three';
+import {Group, Cache} from 'three';
 
+Cache.enabled = true
+
+function onProgress(xhr: ProgressEvent) {
+    if (xhr.lengthComputable) {
+        const percentComplete = xhr.loaded / xhr.total * 100;
+        console.log('model ' + Math.round(percentComplete) + '% downloaded');
+    }
+}
+
+type SupportedLoader = OBJLoader | MTLLoader | FBXLoader;
 
 export class ModelLoader {
     static get instance(): ModelLoader {
@@ -16,17 +27,10 @@ export class ModelLoader {
 
     private static _instance: ModelLoader;
 
-    cachedModels = new Map<string, any>()
-
-
     static loadModel(path: string): Promise<Group> {
         const ext = getExtension(path)
         if (ext === null || !isAcceptedModelExtension(ext)) {
             throw new Error(`path to model ${path} does not have a supported extension`);
-        }
-
-        if (ModelLoader.instance.cachedModels.has(path)) {
-            return ModelLoader.instance.cachedModels.get(path);
         }
 
         let loader: FBXLoader | OBJLoader | GLTFLoader | null = null;
@@ -53,13 +57,30 @@ export class ModelLoader {
                     return
                 }
                 resolve(obj)
-            }, (xhr) => {
-                if (xhr.lengthComputable) {
-                    const percentComplete = xhr.loaded / xhr.total * 100;
-                    console.log('model ' + Math.round(percentComplete) + '% downloaded');
-                }
-            }, reject)
+            }, onProgress, reject)
         })
+    }
 
+    static async loadObj(modelPath: string, materialPath: string) {
+        const modelExt = getExtension(modelPath)
+        const materialExt = getExtension(materialPath)
+        if (modelExt !== '.obj' || materialExt !== '.mtl') {
+            throw new Error(`to load OBJ, model must have '.obj' extension and material '.mtl' extension`);
+        }
+
+        const objLoader = new OBJLoader();
+        const mtlLoader = new MTLLoader();
+
+        const material = await this.loadResource(mtlLoader, materialPath) as MTLLoader.MaterialCreator;
+        material.preload();
+        return await this.loadResource(objLoader.setMaterials(material), modelPath) as Group;
+    }
+
+    private static async loadResource(loader: SupportedLoader , resource: string) {
+        return new Promise((resolve, reject) => {
+            loader.load(resource, (result: Group | MTLLoader.MaterialCreator) => {
+                resolve(result)
+            }, onProgress, reject)
+        })
     }
 }
