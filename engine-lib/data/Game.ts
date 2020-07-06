@@ -45,10 +45,17 @@ export class Game extends GameCycleEntity {
     }
 
     start() {
+        super.start();
         this.renderEngine.start();
     }
 
     update() {
+        super.update();
         this.currentScene.update();
+    }
+
+    destroy() {
+        super.destroy();
+        this.currentScene.destroy();
     }
 }

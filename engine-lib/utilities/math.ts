@@ -1,3 +1,3 @@
-import * as THREE from 'three'
-
-export type Vec3 = THREE.Vector3
+export function randomRange(min: number, max: number) {
+    return Math.random() * (max - min) + min;
+}

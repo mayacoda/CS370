@@ -18,45 +18,40 @@ export class GameScene extends GameCycleEntity {
 
     addObject(object: GameObject) {
         this.objects.add(object);
+        object.setScene(this);
     }
 
     removeObject(object: GameObject) {
         this.objects.delete(object);
+        object.setScene(null)
     }
 
     start() {
+        super.start();
 
         this.scene.background = new THREE.Color( 0xffc275 );
 
         for (const object of this.objects) {
-            object.start();
-
-            if (object.mesh) {
-                this.scene.add(object.mesh);
+            if (object.object3D) {
+                this.scene.add(object.object3D);
             }
+
+            object.start();
         }
 
-        const ground = new THREE.Mesh( new THREE.PlaneBufferGeometry( 1000, 1000 ), new THREE.MeshPhongMaterial( { color: 0x38c77f, depthWrite: false } ) );
-        ground.rotation.x = - Math.PI / 2;
-        ground.receiveShadow = true;
-        this.scene.add( ground );
+        const groundGeometry = new THREE.PlaneBufferGeometry(20, 20, 32, 32);
+        const groundMaterial = new THREE.MeshStandardMaterial({color: '#128d4f'})
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true
 
-        this.scene.add( new THREE.HemisphereLight( 0xf7ac4f, 0x38c77f, 1 ) );
-        let directionalLight = new THREE.DirectionalLight(0xffd16e, 1);
-        directionalLight.castShadow = true;
-        directionalLight.shadow.camera.top = 50;
-        directionalLight.shadow.camera.bottom = -25;
-        directionalLight.shadow.camera.left = -25;
-        directionalLight.shadow.camera.right = 25;
-        directionalLight.shadow.camera.near = 0.1;
-        directionalLight.shadow.camera.far = 200;
-        directionalLight.shadow.mapSize.set(1024, 1024);
-        this.scene.add(directionalLight)
+        this.scene.add(ground);
     }
 
     update(): void {
+        super.update();
         for (const object of this.objects) {
-            object.update()
+            object.update();
         }
     }
 }

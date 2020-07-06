@@ -1,9 +1,6 @@
-import {Game, GameObject, GameScene} from "../../engine-lib";
+import {Game, GameObject, GameScene, Light, LightType, randomRange} from "../../engine-lib";
 import * as THREE from "three";
-
-function getRandomArbitrary(min: number, max: number) {
-    return Math.random() * (max - min) + min;
-}
+import {createAppleTree} from "./appleTree";
 
 export async function loadLevel1(game: Game) {
     const scene = new GameScene();
@@ -14,10 +11,8 @@ export async function loadLevel1(game: Game) {
         const flowerObject = new GameObject()
 
         await flowerObject.loadObj('models/Flower.obj', 'materials/Flower.mtl')
-
-        flowerObject.onStart(() => {
-            flowerObject.translate(new THREE.Vector3(getRandomArbitrary(-5, 5), 0, getRandomArbitrary(-6, 0)));
-        })
+        flowerObject.castShadow()
+        flowerObject.translate(randomRange(-5, 5), 0, randomRange(-6, 0));
 
         flowerObject.onUpdate(() => {
             flowerObject.rotate(new THREE.Vector3(0, 0.01, 0))
@@ -26,19 +21,28 @@ export async function loadLevel1(game: Game) {
         scene.addObject(flowerObject)
     }
 
-    const appleTree = new GameObject()
+    const appleTree = await createAppleTree()
+    appleTree.castShadow()
+    const appleTree2 = await createAppleTree()
+    appleTree2.castShadow()
+    appleTree.translate(2, 0, 0);
+    appleTree2.translate(-4, 0, -2)
 
-    await appleTree.loadObj('models/AppleTree.obj', 'materials/AppleTree.mtl');
-    appleTree.onStart(() => {
-        appleTree.translate(new THREE.Vector3(2, 0, -3))
-    })
     scene.addObject(appleTree)
-
-    const appleTree2 = new GameObject()
-
-    await appleTree2.loadObj('models/AppleTree.obj', 'materials/AppleTree.mtl');
-    appleTree2.onStart(() => {
-        appleTree2.translate(new THREE.Vector3(-4, 0, -5))
-    })
     scene.addObject(appleTree2)
+
+    const ambientLight = new Light(LightType.AmbientLight);
+    ambientLight.setColor('#61b8bf')
+    ambientLight.setIntensity(0.3)
+
+    scene.addObject(ambientLight)
+
+    const directionalLight = new Light(LightType.DirectionalLight);
+    directionalLight.setColor('#faa78b')
+    directionalLight.setIntensity(0.3)
+    // directionalLight.createHelper()
+    directionalLight.translate(0, 5, 0)
+    directionalLight.object3D.castShadow = true;
+
+    scene.addObject(directionalLight)
 }

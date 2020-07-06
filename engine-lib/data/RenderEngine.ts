@@ -16,7 +16,7 @@ export class RenderEngine {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
         const controls = new OrbitControls( this.camera, this.renderer.domElement );
         controls.minDistance = 1;

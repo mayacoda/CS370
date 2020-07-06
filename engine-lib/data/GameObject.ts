@@ -1,45 +1,123 @@
 import * as THREE from "three"
 import {GameCycleEntity} from "./interfaces/GameCycleEntity";
-import {Vec3} from "../utilities";
 import {ModelLoader} from "./ModelLoader";
+import {GameScene} from "./GameScene";
 
 export class GameObject extends GameCycleEntity {
-    mesh?: THREE.Object3D;
+    object3D: THREE.Object3D;
+    private children: Set<GameObject>;
+    private scene: GameScene | null = null;
 
     constructor() {
-        super()
+        super();
+        this.object3D = new THREE.Object3D();
+        this.children = new Set<GameObject>();
+    }
+
+    start() {
+        super.start();
+        this.children.forEach(child => {
+            child.setScene(this.scene)
+            child.start()
+        })
+    }
+
+    update() {
+        this.children.forEach(child => child.update())
+        super.update();
+    }
+
+    destroy() {
+        super.destroy();
+        this.children.forEach(child => child.destroy())
+    }
+
+    addChild(object: GameObject) {
+        this.object3D.add(object.object3D);
+        this.children.add(object)
+    }
+
+    removeChild(object: GameObject) {
+        this.object3D.remove(object.object3D)
+        this.children.delete(object)
     }
 
     createMesh(geometry?: THREE.Geometry, material?: THREE.Material) {
-        this.mesh = new THREE.Mesh(geometry, material)
+        this.object3D = new THREE.Mesh(geometry, material)
     }
 
     async loadObj(modelPath: string, materialPath: string) {
-        this.mesh = await ModelLoader.loadObj(modelPath, materialPath);
+        this.object3D = await ModelLoader.loadObj(modelPath, materialPath);
     }
 
     async loadModel(path: string) {
-        this.mesh = await ModelLoader.loadModel(path)
+        this.object3D = await ModelLoader.loadModel(path)
     }
 
-    rotate(vec3: Vec3) {
-        if (!this.mesh) return
-        this.mesh.rotateX(vec3.x)
-        this.mesh.rotateY(vec3.y)
-        this.mesh.rotateZ(vec3.z)
+    setScene(scene: GameScene | null) {
+        this.scene = scene;
     }
 
-    scale(vec3: Vec3) {
-        if (!this.mesh) return
-        this.mesh.scale.x = vec3.x;
-        this.mesh.scale.y = vec3.y;
-        this.mesh.scale.z = vec3.z;
+    getScene() {
+        return this.scene;
     }
 
-    translate(vec3: Vec3) {
-        if (!this.mesh) return
-        this.mesh.translateX(vec3.x)
-        this.mesh.translateY(vec3.y)
-        this.mesh.translateZ(vec3.z)
+    castShadow(toggle = true) {
+        this.object3D.castShadow = toggle;
+        this.object3D.traverse(child => child.castShadow = toggle);
+    }
+
+    rotate(x?: number, y?: number, z?: number): void
+    rotate(vec3: THREE.Vector3): void
+    rotate(...args: any[]) {
+        let vec3: THREE.Vector3
+        if (args[0] instanceof THREE.Vector3) {
+            vec3 = args[0]
+        } else {
+            vec3 = new THREE.Vector3(args[0], args[1], args[2])
+        }
+        this.object3D.rotateX(vec3.x)
+        this.object3D.rotateY(vec3.y)
+        this.object3D.rotateZ(vec3.z)
+    }
+
+    scale(x?: number, y?: number, z?: number): void
+    scale(vec3: THREE.Vector3): void
+    scale(...args: any[]) {
+        let vec3: THREE.Vector3
+        if (args[0] instanceof THREE.Vector3) {
+            vec3 = args[0]
+        } else {
+            vec3 = new THREE.Vector3(args[0], args[1], args[2])
+        }
+        this.object3D.scale.x = vec3.x;
+        this.object3D.scale.y = vec3.y;
+        this.object3D.scale.z = vec3.z;
+    }
+
+    translate(x?: number, y?: number, z?: number): void
+    translate(vec3: THREE.Vector3): void
+    translate(...args: any[]) {
+        let vec3: THREE.Vector3
+        if (args[0] instanceof THREE.Vector3) {
+            vec3 = args[0]
+        } else {
+            vec3 = new THREE.Vector3(args[0], args[1], args[2])
+        }
+        this.object3D.translateX(vec3.x)
+        this.object3D.translateY(vec3.y)
+        this.object3D.translateZ(vec3.z)
+    }
+
+    get position() {
+        return this.object3D.position;
+    }
+
+    get size() {
+        return this.object3D.scale;
+    }
+
+    get rotation() {
+        return this.object3D.rotation;
     }
 }
