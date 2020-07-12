@@ -7,6 +7,17 @@ export async function loadLevel1(game: Game) {
 
     game.addScene(scene, 'level 1')
 
+    scene.loadSkybox('skybox/Epic_GloriousPink_EquiRect.png');
+
+    // scene.loadSkybox([
+    //     'skybox/CartoonBaseNightSky_Cam_2_Left+X.png',
+    //     'skybox/CartoonBaseNightSky_Cam_3_Right-X.png',
+    //     'skybox/CartoonBaseNightSky_Cam_4_Up+Y.png',
+    //     'skybox/CartoonBaseNightSky_Cam_5_Down-Y.png',
+    //     'skybox/CartoonBaseNightSky_Cam_0_Front+Z.png',
+    //     'skybox/CartoonBaseNightSky_Cam_1_Back-Z.png'
+    // ]);
+
     for (let i = 0; i < 20; i++) {
         const flowerObject = new GameObject()
 

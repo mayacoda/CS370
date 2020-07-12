@@ -1,16 +1,19 @@
 import * as THREE from "three";
 import {Game} from "./Game";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import {ServiceLocator} from "./ServiceLocator";
 
 export class RenderEngine {
-    private camera: THREE.Camera;
+    private camera: THREE.PerspectiveCamera;
     private renderer: THREE.WebGLRenderer;
 
     constructor(canvas: HTMLCanvasElement, private game: Game) {
-        this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 100);
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.001, 100);
         this.camera.rotateX(-0.2);
         this.camera.position.z = 2;
         this.camera.position.y = 2;
+
+        ServiceLocator.setService('camera', this.camera)
 
         this.renderer = new THREE.WebGLRenderer({antialias: true, canvas});
         this.renderer.setSize(window.innerWidth, window.innerHeight);

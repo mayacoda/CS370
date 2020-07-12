@@ -1,10 +1,14 @@
 import {GameObject} from "./GameObject";
 import * as THREE from "three";
 import {GameCycleEntity} from "./interfaces/GameCycleEntity";
+import {TextureLoader} from "./TextureLoader";
+import {ServiceLocator} from "./ServiceLocator";
 
 export class GameScene extends GameCycleEntity {
     private objects: Set<GameObject>
     private scene: THREE.Scene
+
+    private skyboxMesh?: THREE.Mesh;
 
     constructor() {
         super();
@@ -26,10 +30,40 @@ export class GameScene extends GameCycleEntity {
         object.setScene(null)
     }
 
+    /**
+     * @param texture - pos-x, neg-x, pos-y, neg-y, pos-z, neg-z.
+     */
+    loadSkybox(texture: string[] | string) {
+        // cube texture map
+        if (Array.isArray(texture)) {
+            this.scene.background = TextureLoader.loadCubeTexture(texture);
+        } else {
+            // equirectangular map
+            const skybox = TextureLoader.loadTexture(texture);
+            skybox.magFilter = THREE.LinearFilter;
+            skybox.minFilter = THREE.LinearFilter;
+
+            const shader = THREE.ShaderLib.equirect;
+            const material = new THREE.ShaderMaterial({
+                fragmentShader: shader.fragmentShader,
+                vertexShader: shader.vertexShader,
+                uniforms: shader.uniforms,
+                depthWrite: false,
+                side: THREE.BackSide,
+            });
+            material.uniforms.tEquirect.value = skybox;
+            const plane = new THREE.BoxBufferGeometry(1, 1, 1);
+            this.skyboxMesh = new THREE.Mesh(plane, material);
+            this.scene.add(this.skyboxMesh);
+        }
+    }
+
+    loadBackgroundColor(color: string | number) {
+        this.scene.background = new THREE.Color(color)
+    }
+
     start() {
         super.start();
-
-        this.scene.background = new THREE.Color( 0xffc275 );
 
         for (const object of this.objects) {
             if (object.object3D) {
@@ -50,6 +84,10 @@ export class GameScene extends GameCycleEntity {
 
     update(): void {
         super.update();
+        if (this.skyboxMesh) {
+            this.skyboxMesh.position.copy(ServiceLocator.getService<THREE.Camera>('camera').position)
+        }
+
         for (const object of this.objects) {
             object.update();
         }

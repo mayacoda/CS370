@@ -17,15 +17,6 @@ function onProgress(xhr: ProgressEvent) {
 type SupportedLoader = OBJLoader | MTLLoader | FBXLoader;
 
 export class ModelLoader {
-    static get instance(): ModelLoader {
-        if (!this._instance) {
-            this._instance = new ModelLoader()
-        }
-
-        return this._instance;
-    }
-
-    private static _instance: ModelLoader;
 
     static loadModel(path: string): Promise<Group> {
         const ext = getExtension(path)
