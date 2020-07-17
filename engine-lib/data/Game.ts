@@ -1,6 +1,7 @@
 import {GameScene} from "./GameScene";
 import {RenderEngine} from "./RenderEngine";
 import {GameCycleEntity} from "./interfaces/GameCycleEntity";
+import {ServiceLocator} from "./ServiceLocator";
 
 export class Game extends GameCycleEntity {
     private currentScene = new GameScene();
@@ -37,7 +38,8 @@ export class Game extends GameCycleEntity {
 
         this.currentScene = toLoad;
         this.currentScene.start();
-        return;
+
+        ServiceLocator.setService('scene', this.currentScene.getScene())
     }
 
     getCurrentScene(): GameScene {

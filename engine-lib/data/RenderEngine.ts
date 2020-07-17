@@ -8,10 +8,9 @@ export class RenderEngine {
     private renderer: THREE.WebGLRenderer;
 
     constructor(canvas: HTMLCanvasElement, private game: Game) {
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.001, 100);
-        this.camera.rotateX(-0.2);
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.001, 1000);
         this.camera.position.z = 2;
-        this.camera.position.y = 2;
+        this.camera.position.y = 40;
 
         ServiceLocator.setService('camera', this.camera)
 
@@ -21,12 +20,14 @@ export class RenderEngine {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
+        ServiceLocator.setService('renderer', this.renderer)
+
         const controls = new OrbitControls( this.camera, this.renderer.domElement );
         controls.minDistance = 1;
         controls.maxDistance = 100;
         controls.enablePan = true;
         controls.maxPolarAngle = Math.PI / 2;
-        controls.target.set( 0, 1, -5 );
+        controls.target.set( 0, 2, -50 );
         controls.update();
     }
 

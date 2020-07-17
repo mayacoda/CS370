@@ -3,12 +3,15 @@ import * as THREE from "three";
 import {GameCycleEntity} from "./interfaces/GameCycleEntity";
 import {TextureLoader} from "./TextureLoader";
 import {ServiceLocator} from "./ServiceLocator";
+import {Terrain} from "./Terrain";
 
 export class GameScene extends GameCycleEntity {
     private objects: Set<GameObject>
     private scene: THREE.Scene
 
+
     private skyboxMesh?: THREE.Mesh;
+    private terrain?: Terrain;
 
     constructor() {
         super();
@@ -54,6 +57,7 @@ export class GameScene extends GameCycleEntity {
             material.uniforms.tEquirect.value = skybox;
             const plane = new THREE.BoxBufferGeometry(1, 1, 1);
             this.skyboxMesh = new THREE.Mesh(plane, material);
+            this.skyboxMesh.name = 'SkyBox';
             this.scene.add(this.skyboxMesh);
         }
     }
@@ -73,13 +77,13 @@ export class GameScene extends GameCycleEntity {
             object.start();
         }
 
-        const groundGeometry = new THREE.PlaneBufferGeometry(20, 20, 32, 32);
-        const groundMaterial = new THREE.MeshStandardMaterial({color: '#128d4f'})
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true
+        // const groundGeometry = new THREE.PlaneBufferGeometry(20, 20, 32, 32);
+        // const groundMaterial = new THREE.MeshStandardMaterial({color: '#128d4f'})
+        // const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        // ground.rotation.x = -Math.PI / 2;
+        // ground.receiveShadow = true
 
-        this.scene.add(ground);
+        // this.scene.add(ground);
     }
 
     update(): void {
@@ -91,5 +95,28 @@ export class GameScene extends GameCycleEntity {
         for (const object of this.objects) {
             object.update();
         }
+    }
+
+    async loadTerrain(heightMap: string, texture: string) {
+        this.terrain = new Terrain();
+        await this.terrain.loadTerrain(heightMap, texture, {maxHeight: 10});
+        this.scene.add(this.terrain.object3D)
+    }
+
+    convertToTerrainPoint(x: number, y: number, z:number): THREE.Vector3
+    convertToTerrainPoint(x: number, z:number): THREE.Vector3
+    convertToTerrainPoint(...args: number[]) {
+        let x = 0, y, z = 0, yDiff = 0;
+        if (args.length === 3) {
+            x = args[0];
+            yDiff = args[1];
+            z = args[2];
+        } else if (args.length === 2) {
+            x = args[0];
+            z = args[1];
+        }
+
+        y = this.terrain ? this.terrain.getHeightAtPoint(x, z) || 0 : 0;
+        return new THREE.Vector3(x, y + yDiff, z);
     }
 }

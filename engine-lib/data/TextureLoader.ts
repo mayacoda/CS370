@@ -10,4 +10,21 @@ export class TextureLoader {
         const loader = new THREE.TextureLoader();
         return loader.load(texturePath);
     }
+
+    static loadImageData(imagePath: string): Promise<HTMLImageElement> {
+        const image = new Image();
+        return new Promise((resolve, reject) => {
+            image.onload = () => {
+                resolve(image)
+                return
+            }
+
+            image.onerror = (error) => {
+                reject(error)
+                return
+            }
+
+            image.src = imagePath
+        })
+    }
 }
