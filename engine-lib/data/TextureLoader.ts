@@ -1,14 +1,18 @@
 import * as THREE from 'three'
 
 export class TextureLoader {
-    static loadCubeTexture(texturePaths: string[]) {
+    static loadCubeTexture(texturePaths: string[]): Promise<THREE.Texture>  {
         const loader = new THREE.CubeTextureLoader();
-        return loader.load(texturePaths);
+        return new Promise((resolve, reject) => {
+            loader.load(texturePaths, resolve, () => {}, reject);
+        })
     }
 
-    static loadTexture(texturePath: string) {
+    static loadTexture(texturePath: string): Promise<THREE.Texture> {
         const loader = new THREE.TextureLoader();
-        return loader.load(texturePath);
+        return new Promise((resolve, reject) => {
+            loader.load(texturePath, resolve, () => {}, reject)
+        })
     }
 
     static loadImageData(imagePath: string): Promise<HTMLImageElement> {

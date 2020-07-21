@@ -36,13 +36,13 @@ export class GameScene extends GameCycleEntity {
     /**
      * @param texture - pos-x, neg-x, pos-y, neg-y, pos-z, neg-z.
      */
-    loadSkybox(texture: string[] | string) {
+    async loadSkybox(texture: string[] | string) {
         // cube texture map
         if (Array.isArray(texture)) {
-            this.scene.background = TextureLoader.loadCubeTexture(texture);
+            this.scene.background = await TextureLoader.loadCubeTexture(texture);
         } else {
             // equirectangular map
-            const skybox = TextureLoader.loadTexture(texture);
+            const skybox = await TextureLoader.loadTexture(texture);
             skybox.magFilter = THREE.LinearFilter;
             skybox.minFilter = THREE.LinearFilter;
 
@@ -76,14 +76,6 @@ export class GameScene extends GameCycleEntity {
 
             object.start();
         }
-
-        // const groundGeometry = new THREE.PlaneBufferGeometry(20, 20, 32, 32);
-        // const groundMaterial = new THREE.MeshStandardMaterial({color: '#128d4f'})
-        // const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        // ground.rotation.x = -Math.PI / 2;
-        // ground.receiveShadow = true
-
-        // this.scene.add(ground);
     }
 
     update(): void {

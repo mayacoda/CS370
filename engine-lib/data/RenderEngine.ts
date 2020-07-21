@@ -3,14 +3,19 @@ import {Game} from "./Game";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {ServiceLocator} from "./ServiceLocator";
 
+export enum RenderLayers {
+    Default,
+    UnrealBloom
+}
+
 export class RenderEngine {
     private camera: THREE.PerspectiveCamera;
     private renderer: THREE.WebGLRenderer;
 
     constructor(canvas: HTMLCanvasElement, private game: Game) {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.001, 1000);
-        this.camera.position.z = 2;
-        this.camera.position.y = 40;
+        this.camera.position.z = 0;
+        this.camera.position.y = 4;
 
         ServiceLocator.setService('camera', this.camera)
 
@@ -27,7 +32,7 @@ export class RenderEngine {
         controls.maxDistance = 100;
         controls.enablePan = true;
         controls.maxPolarAngle = Math.PI / 2;
-        controls.target.set( 0, 2, -50 );
+        controls.target.set( 0, 1, -3);
         controls.update();
     }
 

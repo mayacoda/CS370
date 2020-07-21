@@ -6,8 +6,7 @@ export async function loadLevel1(game: Game) {
 
     game.addScene(scene, 'level 1')
 
-    scene.loadSkybox('skybox/Epic_GloriousPink_EquiRect.png');
-
+    await scene.loadSkybox('skybox/Epic_GloriousPink_EquiRect.png');
     await scene.loadTerrain('textures/heightmap_128.jpg', 'textures/terrain.jpg');
 
     // scene.loadSkybox([

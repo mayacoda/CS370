@@ -2,6 +2,7 @@ import * as THREE from "three"
 import {GameCycleEntity} from "./interfaces/GameCycleEntity";
 import {ModelLoader} from "./ModelLoader";
 import {GameScene} from "./GameScene";
+import {TextureLoader} from "./TextureLoader";
 
 export class GameObject extends GameCycleEntity {
     object3D: THREE.Object3D;
@@ -52,6 +53,19 @@ export class GameObject extends GameCycleEntity {
 
     async loadModel(path: string) {
         this.object3D = await ModelLoader.loadModel(path)
+    }
+
+    async loadTexture(path: string) {
+        const texture = await TextureLoader.loadTexture(path);
+        this.object3D.traverse(child => {
+            if (child instanceof THREE.Mesh) {
+                let material = child.material;
+                if (!Array.isArray(material)) {
+                    material.map = texture;
+                    material.transparent = true;
+                }
+            }
+        })
     }
 
     setScene(scene: GameScene | null) {
@@ -119,5 +133,21 @@ export class GameObject extends GameCycleEntity {
 
     get rotation() {
         return this.object3D.rotation;
+    }
+
+    setName(name: string) {
+        this.object3D.name = name;
+    }
+
+    getMeshGroupByName(name: string): Promise<THREE.Object3D | null> {
+        return new Promise((resolve) => {
+            this.object3D.traverse(child => {
+                if (child.name === name) {
+                    resolve(child)
+                }
+            })
+
+          resolve(null)
+        })
     }
 }
