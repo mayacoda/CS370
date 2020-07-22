@@ -18,6 +18,7 @@ export async function loadLevel1(game: Game) {
         'skybox/CartoonBaseNightSky_Cam_1_Back-Z.png'
     ]);
 
+    scene.setFog('#2b5c98', 0.03);
     await loadObjects(scene);
     loadLights(scene);
 }

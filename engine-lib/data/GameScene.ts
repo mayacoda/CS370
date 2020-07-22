@@ -62,8 +62,12 @@ export class GameScene extends GameCycleEntity {
         }
     }
 
-    loadBackgroundColor(color: string | number) {
+    setBackgroundColor(color: string | number) {
         this.scene.background = new THREE.Color(color)
+    }
+
+    setFog(color: string | number, density?: number) {
+        this.scene.fog = new THREE.FogExp2(color, density)
     }
 
     start() {
