@@ -55,7 +55,7 @@ export class GameObject extends GameCycleEntity {
         this.object3D = await ModelLoader.loadModel(path)
     }
 
-    async loadTexture(path: string) {
+    async loadTransparentTexture(path: string) {
         const texture = await TextureLoader.loadTexture(path);
         this.object3D.traverse(child => {
             if (child instanceof THREE.Mesh) {
@@ -63,6 +63,7 @@ export class GameObject extends GameCycleEntity {
                 if (!Array.isArray(material)) {
                     material.map = texture;
                     material.transparent = true;
+                    material.side = THREE.DoubleSide;
                 }
             }
         })

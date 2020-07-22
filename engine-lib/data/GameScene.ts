@@ -3,7 +3,7 @@ import * as THREE from "three";
 import {GameCycleEntity} from "./interfaces/GameCycleEntity";
 import {TextureLoader} from "./TextureLoader";
 import {ServiceLocator} from "./ServiceLocator";
-import {Terrain} from "./Terrain";
+import {Terrain, TerrainSettings} from "./Terrain";
 
 export class GameScene extends GameCycleEntity {
     private objects: Set<GameObject>
@@ -89,9 +89,9 @@ export class GameScene extends GameCycleEntity {
         }
     }
 
-    async loadTerrain(heightMap: string, texture: string) {
+    async loadTerrain(heightMap: string, texture: string, settings: TerrainSettings) {
         this.terrain = new Terrain();
-        await this.terrain.loadTerrain(heightMap, texture, {maxHeight: 10});
+        await this.terrain.loadTerrain(heightMap, texture, {...settings, maxHeight: 10});
         this.scene.add(this.terrain.object3D)
     }
 
@@ -110,5 +110,9 @@ export class GameScene extends GameCycleEntity {
 
         y = this.terrain ? this.terrain.getHeightAtPoint(x, z) || 0 : 0;
         return new THREE.Vector3(x, y + yDiff, z);
+    }
+
+    getTerrainNormalAtPoint(x: number, z: number): THREE.Vector3 | null {
+        return this.terrain ? this.terrain.getNormalAtPoint(x, z) : null
     }
 }

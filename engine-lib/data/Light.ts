@@ -3,7 +3,7 @@ import * as THREE from 'three';
 
 export enum LightType {
     AmbientLight = 'AmbientLight',
-    HemisphericLight = 'HemisphericLight',
+    HemisphereLight = 'HemisphereLight',
     DirectionalLight = 'DirectionalLight',
     PointLight = 'PointLight',
     SpotLight = 'SpotLight'
@@ -20,7 +20,7 @@ export class Light extends GameObject {
             case LightType.AmbientLight:
                 this.object3D = new THREE.AmbientLight();
                 break;
-            case LightType.HemisphericLight:
+            case LightType.HemisphereLight:
                 this.object3D = new THREE.HemisphereLight();
                 break;
             case LightType.DirectionalLight:
@@ -47,8 +47,13 @@ export class Light extends GameObject {
         }
     }
 
-    setColor(color: string | number) {
-        this.object3D.color = new THREE.Color(color)
+    setColor(...color: Array<string | number>) {
+        if (color.length === 2 && this.object3D instanceof THREE.HemisphereLight) {
+            this.object3D.groundColor = new THREE.Color(color[0])
+            this.object3D.skyColor = new THREE.Color(color[1])
+        } else {
+            this.object3D.color = new THREE.Color(color[0])
+        }
     }
 
     setIntensity(intensity: number) {
@@ -72,7 +77,7 @@ export class Light extends GameObject {
 
     createHelper() {
         switch (this.object3D.type) {
-            case LightType.HemisphericLight:
+            case LightType.HemisphereLight:
                 this.helper = new THREE.HemisphereLightHelper(this.object3D as THREE.HemisphereLight, .5);
                 break;
             case LightType.DirectionalLight:

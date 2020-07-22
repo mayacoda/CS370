@@ -1,30 +1,31 @@
 import {GameObject, GameScene, Light, LightType} from "../../engine-lib/data";
 import {randomRange} from "../../engine-lib/utilities";
-import * as THREE from "three";
 import {createAppleTree} from "./appleTree";
 
 export async function loadObjects(scene: GameScene) {
-    for (let i = 0; i < 20; i++) {
-        const flowerObject = new GameObject()
+    for (let i = 0; i < 5; i++) {
 
-        await flowerObject.loadObj('models/Flower.obj', 'models/Flower.mtl')
-        flowerObject.castShadow()
+        const fern = new GameObject();
+        await fern.loadObj('models/fern.obj', 'models/fern.mtl');
+        await fern.loadTransparentTexture('models/fern.png');
+
+
+        fern.castShadow()
         let x = randomRange(-5, 5);
-        let z = randomRange(-6, 0);
-        flowerObject.translate(scene.convertToTerrainPoint(x, z));
+        let z = randomRange(-5, 5);
+        fern.translate(scene.convertToTerrainPoint(x, 0.3, z));
 
-        flowerObject.onUpdate(() => {
-            flowerObject.rotate(new THREE.Vector3(0, 0.01, 0))
-        })
+        let scale = randomRange(2, 3);
+        fern.scale(scale, scale, scale);
 
-        scene.addObject(flowerObject)
+        const rotation = scene.getTerrainNormalAtPoint(x, z);
+        if (rotation !== null) {
+            fern.rotate(rotation)
+        }
+
+        scene.addObject(fern)
     }
 
-    const fern = new GameObject();
-    await fern.loadObj('models/fern.obj', 'models/fern.mtl');
-    await fern.loadTexture('models/fern.png');
-    fern.translate(scene.convertToTerrainPoint(2, 0.2, -3))
-    scene.addObject(fern);
 
     await loadLampPosts(scene);
 
@@ -32,7 +33,7 @@ export async function loadObjects(scene: GameScene) {
     appleTree.castShadow()
     const appleTree2 = await createAppleTree()
     appleTree2.castShadow()
-    appleTree.translate(scene.convertToTerrainPoint(2, -0.2,0));
+    appleTree.translate(scene.convertToTerrainPoint(5, -0.2,2));
     appleTree2.translate(scene.convertToTerrainPoint(-4,  -0.2, -2));
 
     scene.addObject(appleTree)
@@ -41,15 +42,14 @@ export async function loadObjects(scene: GameScene) {
 }
 
 export function loadLights(scene: GameScene) {
-    const ambientLight = new Light(LightType.AmbientLight);
-    ambientLight.setColor('#ce74a3')
-    ambientLight.setIntensity(0.1)
-
-    scene.addObject(ambientLight)
+    const hemisphereLight = new Light(LightType.HemisphereLight);
+    hemisphereLight.setColor('#1f6f4e', '#cc95f5')
+    hemisphereLight.setIntensity(0.5)
+    scene.addObject(hemisphereLight)
 
     const directionalLight = new Light(LightType.DirectionalLight);
     directionalLight.setColor('#faa78b')
-    directionalLight.setIntensity(0.3)
+    directionalLight.setIntensity(0.4)
     // directionalLight.createHelper()
     directionalLight.translate(0, 5, 0)
     directionalLight.object3D.castShadow = true;
@@ -63,23 +63,18 @@ async function loadLampPosts(scene: GameScene) {
     const lampPost = new GameObject();
     await lampPost.loadObj('models/lamp-post.obj', 'models/lamp-post.mtl');
     lampPost.setName('Lamp');
-    lampPost.translate(scene.convertToTerrainPoint(2, -4));
+    lampPost.translate(scene.convertToTerrainPoint(0, 0));
     scene.addObject(lampPost)
 
     const light = new Light(LightType.PointLight);
+    light.object3D.castShadow = true;
     light.setColor('#f3caaa');
-    light.setIntensity(0.2);
-    light.createHelper();
+    light.setIntensity(.5);
+    // light.createHelper();
 
     const lightContainer = new GameObject();
     lightContainer.addChild(light);
 
     light.translate(0, 3.75)
     lampPost.addChild(lightContainer)
-
-    // const child = await lampPost.getMeshGroupByName('Glass_Cylinder')
-    //
-    // if (child) {
-    //     child.layers.set(RenderLayers.UnrealBloom);
-    // }
 }
