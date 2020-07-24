@@ -5,20 +5,18 @@ export async function loadLevel1(game: Game) {
     const scene = new GameScene();
 
     game.addScene(scene, 'level 1')
-
-    // await scene.loadSkybox('skybox/Epic_GloriousPink_EquiRect.png');
-    await scene.loadTerrain('textures/heightmap_128.jpg', 'textures/Ground-Texture.png', {repeat: 10, color: '#888'});
+    await scene.loadTerrain('HeightMap8.png', 'textures/Ground-Texture.png', {repeat: 10, color: '#888'});
 
     await scene.loadSkybox([
-        'skybox/CartoonBaseNightSky_Cam_2_Left+X.png',
-        'skybox/CartoonBaseNightSky_Cam_3_Right-X.png',
-        'skybox/CartoonBaseNightSky_Cam_4_Up+Y.png',
-        'skybox/CartoonBaseNightSky_Cam_5_Down-Y.png',
-        'skybox/CartoonBaseNightSky_Cam_0_Front+Z.png',
-        'skybox/CartoonBaseNightSky_Cam_1_Back-Z.png'
+        'skybox/sunset/px.png',
+        'skybox/sunset/nx.png',
+        'skybox/sunset/py.png',
+        'skybox/sunset/ny.png',
+        'skybox/sunset/pz.png',
+        'skybox/sunset/nz.png'
     ]);
 
-    scene.setFog('#2b5c98', 0.03);
+    scene.setFog('#845e5c', 0.03);
     await loadObjects(scene);
     loadLights(scene);
 }

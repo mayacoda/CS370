@@ -95,7 +95,7 @@ export class GameScene extends GameCycleEntity {
 
     async loadTerrain(heightMap: string, texture: string, settings: TerrainSettings) {
         this.terrain = new Terrain();
-        await this.terrain.loadTerrain(heightMap, texture, {...settings, maxHeight: 10});
+        await this.terrain.loadTerrain(heightMap, texture, {maxHeight: 10, ...settings});
         this.scene.add(this.terrain.object3D)
     }
 
