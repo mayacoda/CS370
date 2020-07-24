@@ -18,5 +18,7 @@ async function init() {
 }
 
 init().then(() => {
+    const loader = document.querySelector('.loading') as HTMLElement;
+    loader.style.opacity = '0';
     console.log('Game is ready')
 })
