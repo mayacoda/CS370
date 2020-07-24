@@ -57,6 +57,8 @@ export class GameObject extends GameCycleEntity {
 
     async loadTransparentTexture(path: string) {
         const texture = await TextureLoader.loadTexture(path);
+        // texture.minFilter = THREE.NearestFilter;
+        texture.premultiplyAlpha = true;
         this.object3D.traverse(child => {
             if (child instanceof THREE.Mesh) {
                 let material = child.material;
@@ -64,6 +66,7 @@ export class GameObject extends GameCycleEntity {
                     material.map = texture;
                     material.transparent = true;
                     material.side = THREE.DoubleSide;
+                    material.alphaTest = 0.5;
                 }
             }
         })
@@ -82,6 +85,11 @@ export class GameObject extends GameCycleEntity {
         this.object3D.traverse(child => child.castShadow = toggle);
     }
 
+    receiveShadow(toggle = true) {
+        this.object3D.receiveShadow = toggle;
+        this.object3D.traverse(child => child.receiveShadow = toggle);
+    }
+
     rotate(x?: number, y?: number, z?: number): void
     rotate(vec3: THREE.Vector3): void
     rotate(...args: any[]) {
@@ -96,14 +104,17 @@ export class GameObject extends GameCycleEntity {
         this.object3D.rotateZ(vec3.z)
     }
 
-    scale(x?: number, y?: number, z?: number): void
+    scale(size: number): void
     scale(vec3: THREE.Vector3): void
+    scale(x?: number, y?: number, z?: number): void
     scale(...args: any[]) {
         let vec3: THREE.Vector3
         if (args[0] instanceof THREE.Vector3) {
             vec3 = args[0]
-        } else {
+        } else if (args.length === 3) {
             vec3 = new THREE.Vector3(args[0], args[1], args[2])
+        } else {
+            vec3 = new THREE.Vector3(args[0], args[0], args[0])
         }
         this.object3D.scale.x = vec3.x;
         this.object3D.scale.y = vec3.y;

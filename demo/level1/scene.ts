@@ -1,14 +1,13 @@
 import {GameObject, GameScene, Light, LightType} from "../../engine-lib/data";
 import {randomRange} from "../../engine-lib/utilities";
-import {createAppleTree} from "./appleTree";
+import {createTree} from "./tree";
 
 export async function loadObjects(scene: GameScene) {
     for (let i = 0; i < 5; i++) {
 
         const fern = new GameObject();
         await fern.loadObj('models/fern.obj', 'models/fern.mtl');
-        await fern.loadTransparentTexture('models/fern.png');
-
+        await fern.loadTransparentTexture('models/Fern Base Color.png');
 
         fern.castShadow()
         let x = randomRange(-5, 5);
@@ -29,15 +28,18 @@ export async function loadObjects(scene: GameScene) {
 
     await loadLampPosts(scene);
 
-    const appleTree = await createAppleTree()
-    appleTree.castShadow()
-    const appleTree2 = await createAppleTree()
-    appleTree2.castShadow()
-    appleTree.translate(scene.convertToTerrainPoint(5, -0.2,2));
-    appleTree2.translate(scene.convertToTerrainPoint(-4,  -0.2, -2));
+    const tree = await createTree();
+    tree.castShadow();
+    tree.scale(.7);
+    tree.translate(scene.convertToTerrainPoint(5, -0.2,2));
 
-    scene.addObject(appleTree)
-    scene.addObject(appleTree2)
+    const tree2 = await createTree();
+    tree2.castShadow();
+    tree2.scale(1.2);
+    tree2.translate(scene.convertToTerrainPoint(-4,  -0.2, -2));
+
+    scene.addObject(tree)
+    scene.addObject(tree2)
 
 }
 
