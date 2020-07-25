@@ -45,15 +45,15 @@ export async function loadObjects(scene: GameScene) {
 
 export function loadLights(scene: GameScene) {
     const hemisphereLight = new Light(LightType.HemisphereLight);
-    hemisphereLight.setColor('#1f6f4e', '#cc95f5')
+    hemisphereLight.setColor('#209467', '#be804a')
     hemisphereLight.setIntensity(0.5)
     scene.addObject(hemisphereLight)
 
     const directionalLight = new Light(LightType.DirectionalLight);
     directionalLight.setColor('#faa78b')
-    directionalLight.setIntensity(0.4)
+    directionalLight.setIntensity(0.5)
     // directionalLight.createHelper()
-    directionalLight.translate(0, 5, 0)
+    directionalLight.translate(0, 20, 0)
     directionalLight.object3D.castShadow = true;
 
     scene.addObject(directionalLight)
@@ -70,7 +70,7 @@ async function loadLampPosts(scene: GameScene) {
 
     const light = new Light(LightType.PointLight);
     light.object3D.castShadow = true;
-    light.setColor('#f3caaa');
+    light.setColor('#dd9151');
     light.setIntensity(.5);
     // light.createHelper();
 

@@ -25,8 +25,8 @@ export class Light extends GameObject {
                 break;
             case LightType.DirectionalLight:
                 this.object3D = new THREE.DirectionalLight();
-                this.object3D.shadow.mapSize.width = 2048;
-                this.object3D.shadow.mapSize.height = 2048;
+                this.object3D.shadow.mapSize.width = 256;
+                this.object3D.shadow.mapSize.height = 256;
                 this.object3D.shadow.bias = 0.1;
                 this.object3D.shadow.radius = 5;
                 const d = 10
@@ -40,6 +40,10 @@ export class Light extends GameObject {
             case LightType.PointLight:
                 this.object3D = new THREE.PointLight();
                 this.object3D.castShadow = false;
+                this.object3D.shadow.mapSize.width = 256;
+                this.object3D.shadow.mapSize.height = 256;
+                this.object3D.shadow.bias = 0.1;
+                this.object3D.shadow.radius = 5;
                 break;
             case LightType.SpotLight:
                 this.object3D = new THREE.SpotLight();

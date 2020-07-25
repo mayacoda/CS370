@@ -29,8 +29,8 @@ export class GameObject extends GameCycleEntity {
     }
 
     destroy() {
-        super.destroy();
         this.children.forEach(child => child.destroy())
+        super.destroy();
     }
 
     addChild(object: GameObject) {
@@ -57,8 +57,6 @@ export class GameObject extends GameCycleEntity {
 
     async loadTransparentTexture(path: string) {
         const texture = await TextureLoader.loadTexture(path);
-        // texture.minFilter = THREE.NearestFilter;
-        texture.premultiplyAlpha = true;
         this.object3D.traverse(child => {
             if (child instanceof THREE.Mesh) {
                 let material = child.material;

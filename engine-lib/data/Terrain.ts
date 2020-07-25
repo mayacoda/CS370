@@ -19,17 +19,17 @@ export class Terrain extends GameObject {
         const image = await TextureLoader.loadImageData(heightMap)
 
         const plane = new THREE.PlaneBufferGeometry(width, height, image.width - 1, image.height - 1);
-        plane.rotateX( - Math.PI / 2 );
+        plane.rotateX(-Math.PI / 2);
 
-        this.data = await readHeightData(image, this.maxHeight);
+        this.data = await readHeightData(image);
 
-            const vertices = plane.attributes.position.array
+        const vertices = plane.attributes.position.array
 
         for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
             // j + 1 because it is the y component that we modify
 
             // @ts-ignore
-            vertices[j + 1] = this.data[i];
+            vertices[j + 1] = this.data[i] * maxHeight;
         }
 
         plane.computeVertexNormals();
@@ -65,7 +65,7 @@ export class Terrain extends GameObject {
     }
 }
 
-async function readHeightData(image: HTMLImageElement, maxHeight: number): Promise<Float32Array> {
+async function readHeightData(image: HTMLImageElement): Promise<Float32Array> {
     const width = image.width;
     const height = image.height;
 
@@ -89,8 +89,7 @@ async function readHeightData(image: HTMLImageElement, maxHeight: number): Promi
 
     let j = 0;
     for (let i = 0; i < pix.length; i += 4) {
-        const sum = (pix[i] + pix[i + 1] + pix[i + 2]) / (3 * 255);
-        data[j++] = sum * maxHeight;
+        data[j++] = (pix[i] + pix[i + 1] + pix[i + 2]) / (3 * 255);
     }
 
     return data;
