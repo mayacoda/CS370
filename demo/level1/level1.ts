@@ -1,5 +1,6 @@
 import {Game, GameScene} from "../../engine-lib";
 import {loadLights, loadObjects} from "./scene";
+import {loadCharacter} from "./character";
 
 export async function loadLevel1(game: Game) {
     const scene = new GameScene();
@@ -15,11 +16,17 @@ export async function loadLevel1(game: Game) {
         'skybox/sunset/nz.png'
     ]);
 
+    // todo: fix equirect skybox implementation with version r119 of three
     // await scene.loadSkybox('skybox/sunset/Skybox-equirect.png');
 
-    await scene.loadTerrain('HeightMap8.png', 'textures/Ground-Texture.png', {repeat: 10, color: '#888'});
+    await scene.loadTerrain('HeightMap8.png', 'textures/Ground-Texture.png', {
+        repeat: 10,
+        color: '#888'
+    });
 
     scene.setFog('#845e5c', 0.03);
     await loadObjects(scene);
+    await loadCharacter(scene);
+
     loadLights(scene);
 }

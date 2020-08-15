@@ -82,14 +82,14 @@ export class GameScene extends GameCycleEntity {
         }
     }
 
-    update(): void {
-        super.update();
+    update(time?: number): void {
+        super.update(time);
         if (this.skyboxMesh) {
             this.skyboxMesh.position.copy(ServiceLocator.getService<THREE.Camera>('camera').position)
         }
 
         for (const object of this.objects) {
-            object.update();
+            object.update(time);
         }
     }
 

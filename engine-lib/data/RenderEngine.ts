@@ -9,10 +9,13 @@ export enum RenderLayers {
 }
 
 export class RenderEngine {
-    private camera: THREE.PerspectiveCamera;
-    private renderer: THREE.WebGLRenderer;
+    private readonly camera: THREE.PerspectiveCamera;
+    private readonly renderer: THREE.WebGLRenderer;
+    private readonly clock: THREE.Clock;
 
     constructor(canvas: HTMLCanvasElement, private game: Game) {
+        this.clock = new THREE.Clock();
+
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.001, 1000);
         this.camera.position.z = -8;
         this.camera.position.x = 8;
@@ -27,12 +30,12 @@ export class RenderEngine {
 
         ServiceLocator.setService('renderer', this.renderer)
 
-        const controls = new OrbitControls( this.camera, this.renderer.domElement );
+        const controls = new OrbitControls(this.camera, this.renderer.domElement);
         controls.minDistance = 1;
         controls.maxDistance = 100;
         controls.enablePan = true;
         controls.maxPolarAngle = Math.PI / 2;
-        controls.target.set( 0, 0, 0);
+        controls.target.set(0, 0, 0);
         controls.update();
     }
 
@@ -43,7 +46,8 @@ export class RenderEngine {
     update() {
         const step = () => {
             requestAnimationFrame(step)
-            this.game.update();
+            const delta = this.clock.getDelta()
+            this.game.update(delta);
 
             let currentGameScene = this.game.getCurrentScene();
             let scene = currentGameScene.getScene();
