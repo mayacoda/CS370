@@ -81,6 +81,10 @@ export class AnimatedGameObject extends GameObject {
         action.setEffectiveWeight(weight);
     }
 
+    setTimeScale(animation: string, scale: number) {
+        this.getAction(animation).setEffectiveTimeScale(scale)
+    }
+
     private executeCrossFade(startAction: THREE.AnimationAction, endAction: THREE.AnimationAction, duration: number) {
         this.setWeight(endAction, 1);
 

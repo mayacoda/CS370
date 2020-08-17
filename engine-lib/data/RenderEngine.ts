@@ -25,6 +25,7 @@ export class RenderEngine {
 
         this.renderer = new THREE.WebGLRenderer({antialias: true, canvas});
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
