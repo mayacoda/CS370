@@ -1,5 +1,4 @@
 import {GameObject} from "./GameObject";
-import {ModelLoader} from "./ModelLoader";
 import * as THREE from "three";
 
 export class AnimatedGameObject extends GameObject {
@@ -16,29 +15,18 @@ export class AnimatedGameObject extends GameObject {
         }
     }
 
-    async loadGLTF(modelPath: string): Promise<void> {
-        let gltf = await ModelLoader.loadGltf(modelPath);
-        this.object3D = gltf.scene;
-
-        this.loadAnimations(gltf);
+    async loadGLTF(modelPath: string) {
+        let gltf = await super.loadGLTF(modelPath);
+        if (gltf) {
+            this.loadAnimations(gltf);
+        }
     }
 
     async loadFBX(modelPath: string): Promise<void> {
-        let fbx = await ModelLoader.loadFbx(modelPath);
-        this.object3D = fbx;
-
-        this.loadAnimations(fbx);
-
-        this.object3D.traverse(child => {
-            if (child instanceof THREE.Mesh) {
-                let material = child.material;
-                if (material instanceof THREE.MeshPhongMaterial) {
-                    material.shininess = 0;
-                    material.color = new THREE.Color('#fff')
-                    material.specular = new THREE.Color('#fff')
-                }
-            }
-        })
+        let fbx = await super.loadFBX(modelPath);
+        if (fbx) {
+            this.loadAnimations(fbx);
+        }
     }
 
     private loadAnimations(object: { animations?: THREE.AnimationClip[] }) {
@@ -63,7 +51,7 @@ export class AnimatedGameObject extends GameObject {
         return action
     }
 
-    crossFadeAnimationImmediate(start: string, end: string, duration: number) {
+    crossFadeAnimationImmediate(start: string, end: string, duration: number = 0) {
         const startAction = this.getAction(start);
         const endAction = this.getAction(end);
         this.executeCrossFade(startAction, endAction, duration);
@@ -77,8 +65,12 @@ export class AnimatedGameObject extends GameObject {
 
     private setWeight(action: THREE.AnimationAction, weight: number) {
         action.enabled = true;
-        action.setEffectiveTimeScale(1);
         action.setEffectiveWeight(weight);
+    }
+
+    public getWeight(animation: string) {
+        const action = this.getAction(animation);
+        return action.getEffectiveWeight();
     }
 
     setTimeScale(animation: string, scale: number) {

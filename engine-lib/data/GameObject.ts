@@ -52,9 +52,29 @@ export class GameObject extends GameCycleEntity {
         this.object3D = await ModelLoader.loadObj(modelPath, materialPath);
     }
 
-    async loadGLTF(modelPath: string) {
+    async loadGLTF(modelPath: string): Promise<ReturnType<typeof ModelLoader.loadGltf> | void> {
         let gltf = await ModelLoader.loadGltf(modelPath);
         this.object3D = gltf.scene;
+
+        return gltf
+    }
+
+    async loadFBX(modelPath: string): Promise<ReturnType<typeof ModelLoader.loadFbx> | void> {
+        let fbx = await ModelLoader.loadFbx(modelPath);
+        this.object3D = fbx;
+
+        this.object3D.traverse(child => {
+            if (child instanceof THREE.Mesh) {
+                let material = child.material;
+                if (material instanceof THREE.MeshPhongMaterial) {
+                    material.shininess = 0;
+                    material.color = new THREE.Color('#fff')
+                    material.specular = new THREE.Color('#fff')
+                }
+            }
+        })
+
+        return fbx
     }
 
     async loadTransparentTexture(path: string) {

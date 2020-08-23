@@ -10,6 +10,7 @@ export class Game extends GameCycleEntity {
 
     constructor(canvas: HTMLCanvasElement) {
         super();
+        ServiceLocator.setService('canvas', canvas);
         this.renderEngine = new RenderEngine(canvas, this)
     }
 
