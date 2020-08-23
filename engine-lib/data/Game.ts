@@ -10,6 +10,7 @@ export class Game extends GameCycleEntity {
 
     constructor(canvas: HTMLCanvasElement) {
         super();
+        ServiceLocator.setService('canvas', canvas);
         this.renderEngine = new RenderEngine(canvas, this)
     }
 
@@ -51,9 +52,9 @@ export class Game extends GameCycleEntity {
         this.renderEngine.start();
     }
 
-    update() {
-        super.update();
-        this.currentScene.update();
+    update(time?: number) {
+        super.update(time);
+        this.currentScene.update(time);
     }
 
     destroy() {

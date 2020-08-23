@@ -39,7 +39,7 @@ export class Terrain extends GameObject {
         map.wrapT = THREE.RepeatWrapping;
         map.repeat.set(repeat, repeat)
 
-        const groundMaterial = new THREE.MeshToonMaterial({map, shininess: 0, color})
+        const groundMaterial = new THREE.MeshToonMaterial({map, color})
         this.object3D = new THREE.Mesh(plane, groundMaterial);
         this.object3D.receiveShadow = true;
         this.object3D.name = 'Terrain';

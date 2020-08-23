@@ -1,4 +1,4 @@
-type Service = 'camera' | 'renderer' | 'scene';
+type Service = 'camera' | 'renderer' | 'scene' | 'canvas';
 
 export class ServiceLocator {
     private container: Map<Service, any> = new Map<Service, any>()

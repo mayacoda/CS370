@@ -12,7 +12,7 @@ export async function loadObjects(scene: GameScene) {
         fern.castShadow()
         let x = randomRange(-5, 5);
         let z = randomRange(-5, 5);
-        fern.translate(scene.convertToTerrainPoint(x, 0.3, z));
+        fern.translate(scene.convertWorldPointToTerrainPoint(x, 0.3, z));
 
         let scale = randomRange(2, 3);
         fern.scale(scale, scale, scale);
@@ -31,12 +31,12 @@ export async function loadObjects(scene: GameScene) {
     const tree = await createTree();
     tree.castShadow();
     tree.scale(.7);
-    tree.translate(scene.convertToTerrainPoint(5, -0.2,2));
+    tree.translate(scene.convertWorldPointToTerrainPoint(5, -0.2,2));
 
     const tree2 = await createTree();
     tree2.castShadow();
     tree2.scale(1.2);
-    tree2.translate(scene.convertToTerrainPoint(-4,  -0.2, -2));
+    tree2.translate(scene.convertWorldPointToTerrainPoint(-4,  -0.2, -2));
 
     scene.addObject(tree)
     scene.addObject(tree2)
@@ -65,7 +65,7 @@ async function loadLampPosts(scene: GameScene) {
     const lampPost = new GameObject();
     await lampPost.loadObj('models/lamp-post.obj', 'models/lamp-post.mtl');
     lampPost.setName('Lamp');
-    lampPost.translate(scene.convertToTerrainPoint(0, 0));
+    lampPost.translate(scene.convertWorldPointToTerrainPoint(0, 0));
     scene.addObject(lampPost)
 
     const light = new Light(LightType.PointLight);

@@ -82,14 +82,14 @@ export class GameScene extends GameCycleEntity {
         }
     }
 
-    update(): void {
-        super.update();
+    update(time?: number): void {
+        super.update(time);
         if (this.skyboxMesh) {
             this.skyboxMesh.position.copy(ServiceLocator.getService<THREE.Camera>('camera').position)
         }
 
         for (const object of this.objects) {
-            object.update();
+            object.update(time);
         }
     }
 
@@ -99,9 +99,9 @@ export class GameScene extends GameCycleEntity {
         this.scene.add(this.terrain.object3D)
     }
 
-    convertToTerrainPoint(x: number, y: number, z:number): THREE.Vector3
-    convertToTerrainPoint(x: number, z:number): THREE.Vector3
-    convertToTerrainPoint(...args: number[]) {
+    convertWorldPointToTerrainPoint(x: number, y: number, z: number): THREE.Vector3
+    convertWorldPointToTerrainPoint(x: number, z: number): THREE.Vector3
+    convertWorldPointToTerrainPoint(...args: number[]) {
         let x = 0, y, z = 0, yDiff = 0;
         if (args.length === 3) {
             x = args[0];
@@ -114,6 +114,23 @@ export class GameScene extends GameCycleEntity {
 
         y = this.terrain ? this.terrain.getHeightAtPoint(x, z) || 0 : 0;
         return new THREE.Vector3(x, y + yDiff, z);
+    }
+
+    convertScreenPointToTerrainPoint(x: number = 0, y: number = 0) {
+        if (!this.terrain) return null;
+
+        const mouse = new THREE.Vector2();
+        const size = new THREE.Vector2();
+        ServiceLocator.getService<THREE.WebGLRenderer>('renderer').getSize(size);
+
+        mouse.x = (x / size.x) * 2 - 1;
+        mouse.y = (y / size.y) * 2 + 1;
+
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, ServiceLocator.getService<THREE.Camera>('camera'));
+        const intersects = raycaster.intersectObject(this.terrain.object3D);
+
+        return intersects ? intersects[0].point : null;
     }
 
     getTerrainNormalAtPoint(x: number, z: number): THREE.Vector3 | null {

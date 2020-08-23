@@ -8,7 +8,7 @@ export class GameCycleEntity {
     start() {
         this.startHandlers.forEach(fn => fn())
     }
-    update() {
+    update(time?: number) {
         this.updateHandlers.forEach(fn => fn())
     }
     destroy() {

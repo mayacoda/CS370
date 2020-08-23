@@ -6,8 +6,9 @@ import {TextureLoader} from "./TextureLoader";
 
 export class GameObject extends GameCycleEntity {
     object3D: THREE.Object3D;
-    private children: Set<GameObject>;
-    private scene: GameScene | null = null;
+
+    protected children: Set<GameObject>;
+    protected scene: GameScene | null = null;
 
     constructor() {
         super();
@@ -23,8 +24,8 @@ export class GameObject extends GameCycleEntity {
         })
     }
 
-    update() {
-        this.children.forEach(child => child.update())
+    update(time?: number) {
+        this.children.forEach(child => child.update(time))
         super.update();
     }
 
@@ -51,8 +52,29 @@ export class GameObject extends GameCycleEntity {
         this.object3D = await ModelLoader.loadObj(modelPath, materialPath);
     }
 
-    async loadModel(path: string) {
-        this.object3D = await ModelLoader.loadModel(path)
+    async loadGLTF(modelPath: string): Promise<ReturnType<typeof ModelLoader.loadGltf> | void> {
+        let gltf = await ModelLoader.loadGltf(modelPath);
+        this.object3D = gltf.scene;
+
+        return gltf
+    }
+
+    async loadFBX(modelPath: string): Promise<ReturnType<typeof ModelLoader.loadFbx> | void> {
+        let fbx = await ModelLoader.loadFbx(modelPath);
+        this.object3D = fbx;
+
+        this.object3D.traverse(child => {
+            if (child instanceof THREE.Mesh) {
+                let material = child.material;
+                if (material instanceof THREE.MeshPhongMaterial) {
+                    material.shininess = 0;
+                    material.color = new THREE.Color('#fff')
+                    material.specular = new THREE.Color('#fff')
+                }
+            }
+        })
+
+        return fbx
     }
 
     async loadTransparentTexture(path: string) {
