@@ -44,12 +44,15 @@ export class GameCamera extends GameObject {
         this.followOffset = new THREE.Vector3(x, y, z);
 
         const parent = new GameObject();
+        parent.object3D.name = 'Camera Parent'
         if (this.scene) {
             this.scene.removeObject(this);
             this.scene.addObject(parent);
         }
 
         parent.addChild(this);
+
+        this.translate(this.followOffset);
         this.parent = parent;
     }
 
@@ -58,7 +61,6 @@ export class GameCamera extends GameObject {
 
         if (this.followTarget && this.parent) {
             this.parent.position.copy(this.followTarget.position);
-            this.translate(this.followOffset);
         }
 
         if (this.lookAtTarget) {

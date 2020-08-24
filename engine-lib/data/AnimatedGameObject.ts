@@ -47,7 +47,7 @@ export class AnimatedGameObject extends GameObject {
 
     private getAction(animation: string) {
         const action = this.animationActions.get(animation)
-        if (!action) throw new Error(`Could not find animation ${animation}`)
+        if (!action) throw new Error(`Could not find animation ${animation}, available animations are ${this.animationActions.keys()}`)
         return action
     }
 
