@@ -8,12 +8,13 @@ async function init() {
 
     // start the game
     const game = new Game(canvas);
+    await game.preload()
 
     // load the first level
     await loadLevel1(game);
 
     // set current scene to first level
-    game.loadScene('level 1');
+    game.loadScene( 'level 1');
     game.start();
 }
 

@@ -1,6 +1,6 @@
 import {GameObject} from "./GameObject";
 import * as THREE from "three";
-import {GameCycleEntity} from "./interfaces/GameCycleEntity";
+import {GameCycleEntity} from "./GameCycleEntity";
 import {TextureLoader} from "./TextureLoader";
 import {ServiceLocator} from "./ServiceLocator";
 import {Terrain, TerrainSettings} from "./Terrain";
@@ -8,7 +8,6 @@ import {Terrain, TerrainSettings} from "./Terrain";
 export class GameScene extends GameCycleEntity {
     private objects: Set<GameObject>
     private scene: THREE.Scene
-
 
     private skyboxMesh?: THREE.Mesh;
     private terrain?: Terrain;
@@ -26,11 +25,13 @@ export class GameScene extends GameCycleEntity {
     addObject(object: GameObject) {
         this.objects.add(object);
         object.setScene(this);
+        this.scene.add(object.object3D);
     }
 
     removeObject(object: GameObject) {
         this.objects.delete(object);
         object.setScene(null)
+        this.scene.remove(object.object3D);
     }
 
     /**
@@ -73,11 +74,11 @@ export class GameScene extends GameCycleEntity {
     start() {
         super.start();
 
-        for (const object of this.objects) {
-            if (object.object3D) {
-                this.scene.add(object.object3D);
-            }
+        if (this.terrain) {
+            this.terrain.start();
+        }
 
+        for (const object of this.objects) {
             object.start();
         }
     }
@@ -95,7 +96,7 @@ export class GameScene extends GameCycleEntity {
 
     async loadTerrain(heightMap: string, texture: string, settings: TerrainSettings) {
         this.terrain = new Terrain();
-        await this.terrain.loadTerrain(heightMap, texture, {maxHeight: 10, ...settings});
+        await this.terrain.loadTerrain(heightMap, texture, settings);
         this.scene.add(this.terrain.object3D)
     }
 
@@ -130,7 +131,7 @@ export class GameScene extends GameCycleEntity {
         raycaster.setFromCamera(mouse, ServiceLocator.getService<THREE.Camera>('camera'));
         const intersects = raycaster.intersectObject(this.terrain.object3D);
 
-        return intersects ? intersects[0].point : null;
+        return (intersects && intersects[0]) ? intersects[0].point : null;
     }
 
     getTerrainNormalAtPoint(x: number, z: number): THREE.Vector3 | null {

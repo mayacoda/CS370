@@ -15,8 +15,8 @@ export async function loadCharacter(scene: GameScene) {
     dog.object3D.name = 'Main Character'
 
     dog.scale(2);
-    dog.translate(scene.convertWorldPointToTerrainPoint(3, -4));
-    dog.rotate(0, Math.PI - Math.PI / 4, 0);
+    dog.translate(scene.convertWorldPointToTerrainPoint(50, 50));
+    dog.rotate(0, Math.PI + Math.PI / 4, 0);
     dog.castShadow(true)
 
     let state: DogState = DogState.idle;
@@ -52,7 +52,12 @@ export async function loadCharacter(scene: GameScene) {
             }
 
             const elevation = scene.convertWorldPointToTerrainPoint(dog.position.x, dog.position.z).y - dog.position.y;
-            dog.translate(0, elevation, getSpeed(state, dog));
+            const speed = getSpeed(state, dog);
+            dog.translate(0, elevation, speed);
+
+            if (dog.position.x > 62 || dog.position.z > 62) {
+                dog.translate(0, elevation, -speed);
+            }
         }
 
         if (GameInput.isKeyPressed('KeyA')) {
@@ -71,5 +76,5 @@ export async function loadCharacter(scene: GameScene) {
 
 function getSpeed(state: DogState, dog: AnimatedGameObject) {
     const runningWeight = dog.getWeight(DogState.running);
-    return Math.max(.4 * runningWeight, .1);
+    return Math.max(.5 * runningWeight, .2);
 }

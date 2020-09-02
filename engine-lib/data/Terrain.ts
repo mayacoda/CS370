@@ -1,27 +1,47 @@
 import {GameObject} from "./GameObject";
 import {TextureLoader} from "./TextureLoader";
 import * as THREE from "three";
+import {ServiceLocator} from "./ServiceLocator";
+import {PhysicsEngine} from "./PhysicsEngine";
+
 
 export interface TerrainSettings {
-    width?: number
-    height?: number,
+    widthExtents?: number
+    depthExtents?: number,
     maxHeight?: number,
     repeat?: number,
-    color?: string
+    color?: string,
+    hasPhysics?: boolean
 }
 
 export class Terrain extends GameObject {
-    private data?: Float32Array;
+    private normalizedHeightData?: Float32Array;
     private maxHeight: number = 3;
+    private width?: number;
+    private depth?: number
+    private depthExtents?: number;
+    private widthExtents?: number;
+    private hasPhysics = false;
 
-    async loadTerrain(heightMap: string, texture: string, {width = 100, height = 100, maxHeight = 3, repeat = 1, color = '#888'}: TerrainSettings) {
+    tag = 'terrain';
+
+    async loadTerrain(heightMap: string,
+                      texture: string,
+                      {widthExtents = 100, depthExtents = 100, maxHeight = 3, repeat = 1, color = '#888', hasPhysics = false}: TerrainSettings) {
         this.maxHeight = maxHeight
+        this.depthExtents = depthExtents;
+        this.widthExtents = widthExtents;
+        this.hasPhysics = hasPhysics;
+
         const image = await TextureLoader.loadImageData(heightMap)
 
-        const plane = new THREE.PlaneBufferGeometry(width, height, image.width - 1, image.height - 1);
+        this.width = image.width;
+        this.depth = image.height;
+
+        const plane = new THREE.PlaneBufferGeometry(widthExtents, depthExtents, image.width - 1, image.height - 1);
         plane.rotateX(-Math.PI / 2);
 
-        this.data = await readHeightData(image);
+        this.normalizedHeightData = await readHeightData(image);
 
         const vertices = plane.attributes.position.array
 
@@ -29,7 +49,7 @@ export class Terrain extends GameObject {
             // j + 1 because it is the y component that we modify
 
             // @ts-ignore
-            vertices[j + 1] = this.data[i] * maxHeight;
+            vertices[j + 1] = this.normalizedHeightData[i] * maxHeight;
         }
 
         plane.computeVertexNormals();
@@ -43,6 +63,14 @@ export class Terrain extends GameObject {
         this.object3D = new THREE.Mesh(plane, groundMaterial);
         this.object3D.receiveShadow = true;
         this.object3D.name = 'Terrain';
+    }
+
+    start() {
+        super.start();
+        if (this.hasPhysics) {
+            const physics = ServiceLocator.getService<PhysicsEngine>('physics');
+            physics.addTerrain(this);
+        }
     }
 
     getHeightAtPoint(x: number, z: number) {
@@ -62,6 +90,20 @@ export class Terrain extends GameObject {
             return intersection.face.normal;
         }
         return null;
+    }
+
+    get heightData() {
+        return this.normalizedHeightData;
+    }
+
+    get dimensions() {
+        return {
+            width: this.width,
+            depth: this.depth,
+            widthExtents: this.widthExtents,
+            depthExtents: this.depthExtents,
+            maxHeight: this.maxHeight
+        };
     }
 }
 

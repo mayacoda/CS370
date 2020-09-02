@@ -5,8 +5,13 @@ export class GameCycleEntity {
     protected startHandlers = new Set<EventHandlerCallback>();
     protected destroyHandlers = new Set<EventHandlerCallback>();
 
+    wasStarted = false;
+
     start() {
-        this.startHandlers.forEach(fn => fn())
+        if (!this.wasStarted) {
+            this.wasStarted = true;
+            this.startHandlers.forEach(fn => fn())
+        }
     }
     update(time?: number) {
         this.updateHandlers.forEach(fn => fn())

@@ -21,6 +21,7 @@
     "downlevelIteration": true
   },
   "include": [
-    "src"
+    "demo",
+    "engine-lib"
   ]
 }

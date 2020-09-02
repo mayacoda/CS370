@@ -50,8 +50,9 @@ export class GameCamera extends GameObject {
             this.scene.addObject(parent);
         }
 
-        parent.addChild(this);
+        parent.rotation.copy(target.object3D.rotation);
 
+        parent.addChild(this);
         this.translate(this.followOffset);
         this.parent = parent;
     }
