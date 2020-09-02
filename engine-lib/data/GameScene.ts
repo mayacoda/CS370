@@ -4,10 +4,13 @@ import {GameCycleEntity} from "./GameCycleEntity";
 import {TextureLoader} from "./TextureLoader";
 import {ServiceLocator} from "./ServiceLocator";
 import {Terrain, TerrainSettings} from "./Terrain";
+import {GameUI} from "./GameUI";
 
 export class GameScene extends GameCycleEntity {
     private objects: Set<GameObject>
     private scene: THREE.Scene
+
+    private gui: GameUI;
 
     private skyboxMesh?: THREE.Mesh;
     private terrain?: Terrain;
@@ -16,6 +19,11 @@ export class GameScene extends GameCycleEntity {
         super();
         this.objects = new Set<GameObject>();
         this.scene = new THREE.Scene();
+        this.gui = new GameUI();
+    }
+
+    getGUI() {
+        return this.gui;
     }
 
     getScene() {

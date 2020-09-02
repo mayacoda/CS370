@@ -16,6 +16,16 @@ export class RenderEngine {
         this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
         ServiceLocator.setService('renderer', this.renderer)
+
+        window.addEventListener('resize', () => {
+            const camera = ServiceLocator.getService<THREE.Camera>('camera');
+            if (camera instanceof THREE.PerspectiveCamera) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            }
+
+            this.renderer.setSize( window.innerWidth, window.innerHeight );
+        }, false);
     }
 
     start() {

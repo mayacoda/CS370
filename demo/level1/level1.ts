@@ -3,6 +3,7 @@ import {loadLights, loadObjects} from "./scene";
 import {loadCharacter} from "./character";
 import {loadCamera} from "./camera";
 import {initGamePlay} from "./gameplay";
+import {initGui} from "./gui";
 
 export async function loadLevel1(game: Game) {
     const scene = new GameScene();
@@ -37,5 +38,6 @@ export async function loadLevel1(game: Game) {
     loadCamera(scene, character);
     loadLights(scene);
 
+    initGui(scene);
     initGamePlay(scene, character);
 }

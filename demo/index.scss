@@ -1,4 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Joti+One&display=swap');
+
+$fancy-font-color: #f1a41e;
+$fancy-font-family: 'Joti One', cursive;
+
+
 body, html {
   margin: 0;
   padding: 0;
 }
+
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
+.loading {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background: black;
+  color: #cbbebe;
+  pointer-events: none;
+
+  font-family: "Helvetica Neue", "Microsoft Sans Serif", sans-serif;
+  font-size: 40px;
+  text-align: center;
+
+  transition: opacity ease-out 200ms;
+}
+
+.header {
+  display: flex;
+  padding: 20px;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+
+  font-family: $fancy-font-family;
+  font-size: 2em;
+  color: $fancy-font-color;
+  text-shadow: 0 0 2px #0e0303;
+}
+
+.exclamation {
+  font-family: $fancy-font-family;
+  width: 100%;
+  font-size: 3em;
+  color: $fancy-font-color;
+  text-align: center;
+  text-shadow: 0 0 2px #0e0303;
+}
+

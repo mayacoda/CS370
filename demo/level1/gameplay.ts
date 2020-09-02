@@ -2,10 +2,16 @@ import {GameObject, GameScene} from "../../engine-lib/data";
 import {launchBall} from "./ball";
 import * as THREE from 'three';
 
+let score = 0;
+let time = 0;
+let interval;
+
 export function initGamePlay(scene: GameScene, character: GameObject) {
     let {ball, hits} = launchBall(scene, character.position)
 
     attachListener(ball);
+
+    incrementTime(scene);
 
     function relaunchBall() {
         const data = launchBall(scene, character.position);
@@ -31,6 +37,8 @@ export function initGamePlay(scene: GameScene, character: GameObject) {
                     material.opacity = 1;
                 }
 
+                incrementScore(scene);
+
                 removeBall(ball, hits);
                 relaunchBall();
             }
@@ -43,7 +51,36 @@ export function initGamePlay(scene: GameScene, character: GameObject) {
     }
 }
 
+function incrementTime(scene: GameScene) {
+    const timeElement = scene.getGUI().getElement('.time');
+
+    interval = setInterval(() => {
+        time++;
+        timeElement.innerHTML = formatTime(time);
+    }, 1000);
+}
+
 function removeBall(ball: GameObject, hits: GameObject[]) {
     hits.forEach(hit => hit.destroy());
     ball.destroy();
+}
+
+function incrementScore(scene: GameScene) {
+    const exclamation = scene.getGUI().getElement('.exclamation');
+    exclamation.innerHTML = 'Score!'
+    setTimeout(() => {
+        exclamation.innerHTML = ''
+    }, 3000);
+
+    const scoreElement = scene.getGUI().getElement('.score');
+    score++;
+
+    scoreElement.innerHTML = score.toString();
+}
+
+function formatTime(time: number) {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+
+    return minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0')
 }
