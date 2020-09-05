@@ -63,8 +63,9 @@ export function restartGui(scene: GameScene) {
 export function showExclamation(scene: GameScene, text: string) {
     const exclamation = scene.getGUI().getElement('.exclamation');
     exclamation.innerHTML = text
+    if (timeout) window.clearTimeout(timeout);
+
     timeout = window.setTimeout(() => {
-        if (timeout) window.clearTimeout(timeout);
         exclamation.innerHTML = ''
     }, 3000);
 }
