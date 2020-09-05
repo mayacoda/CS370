@@ -1,29 +1,11 @@
 <html>
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=Joti+One&display=swap" rel="stylesheet">
     <link href="./index.scss" rel="stylesheet"/>
     <title>CS370 - game engine</title>
-    <style lang="css">
-        .loading {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            width: 100%;
-            background: black;
-            color: #cbbebe;
-            pointer-events: none;
-
-            font-family: "Helvetica Neue", "Microsoft Sans Serif", sans-serif;
-            font-size: 40px;
-            text-align: center;
-
-            transition: opacity ease-out 200ms;
-        }
-    </style>
 </head>
 <body>
-<div class="loading">
+<div class="loading full-screen-overlay">
     Loading...
 </div>
 <canvas id="canvas"></canvas>

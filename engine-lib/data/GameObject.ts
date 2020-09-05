@@ -1,14 +1,21 @@
 import * as THREE from "three"
-import {GameCycleEntity} from "./interfaces/GameCycleEntity";
+import {GameCycleEntity} from "./GameCycleEntity";
 import {ModelLoader} from "./ModelLoader";
 import {GameScene} from "./GameScene";
 import {TextureLoader} from "./TextureLoader";
+import Ammo from "ammojs-typed";
+import {PhysicsEngine} from "./PhysicsEngine";
+import {ServiceLocator} from "./ServiceLocator";
+import {RigidBodySettings} from "./interfaces/physics-interfaces";
 
 export class GameObject extends GameCycleEntity {
     object3D: THREE.Object3D;
+    tag: string = '';
 
     protected children: Set<GameObject>;
     protected scene: GameScene | null = null;
+
+    protected rb?: Ammo.btRigidBody;
 
     constructor() {
         super();
@@ -31,6 +38,18 @@ export class GameObject extends GameCycleEntity {
 
     destroy() {
         this.children.forEach(child => child.destroy())
+        this.scene?.removeObject(this);
+
+        if (this.rb) {
+            const physics = ServiceLocator.getService<PhysicsEngine>('physics');
+            physics.removeRigidBody(this.rb);
+        }
+
+        if (this.object3D instanceof THREE.Mesh) {
+            this.object3D.geometry.dispose();
+            (this.object3D.material as THREE.Material).dispose();
+        }
+
         super.destroy();
     }
 
@@ -167,6 +186,10 @@ export class GameObject extends GameCycleEntity {
         return this.object3D.rotation;
     }
 
+    get rigidBody() {
+        return this.rb;
+    }
+
     setName(name: string) {
         this.object3D.name = name;
     }
@@ -179,7 +202,16 @@ export class GameObject extends GameCycleEntity {
                 }
             })
 
-          resolve(null)
+            resolve(null)
         })
+    }
+
+    createRigidBody(settings: RigidBodySettings) {
+        const physics = ServiceLocator.getService<PhysicsEngine>('physics');
+        this.rb = physics.createRigidBody({...settings, object: this});
+    }
+
+    getName() {
+        return this.object3D.name;
     }
 }

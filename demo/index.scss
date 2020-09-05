@@ -1,4 +1,82 @@
+$fancy-font-color: #f1a41e;
+$fancy-font-family: 'Joti One', cursive;
+
+
 body, html {
   margin: 0;
   padding: 0;
+  font-family: "Helvetica Neue", "Microsoft Sans Serif", sans-serif;
+}
+
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
+.loading {
+  background: black;
+  color: #cbbebe;
+  pointer-events: none;
+
+  font-family: $fancy-font-family;
+  font-size: 40px;
+  text-align: center;
+
+  transition: opacity ease-out 200ms;
+}
+
+.header {
+  display: flex;
+  padding: 20px;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+
+  font-family: $fancy-font-family;
+  font-size: 2em;
+  color: $fancy-font-color;
+  text-shadow: 0 0 2px #0e0303;
+}
+
+.exclamation {
+  font-family: $fancy-font-family;
+  width: 100%;
+  font-size: 3em;
+  color: $fancy-font-color;
+  text-align: center;
+  text-shadow: 0 0 2px #0e0303;
+}
+
+.full-screen-overlay {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.instructions {
+  text-align: center;
+  line-height: 2em;
+  flex-direction: column;
+  padding: 30px;
+  border-radius: 10px;
+  background: rgba(255, 205, 117, .5);
+
+  button {
+    font-family: $fancy-font-family;
+    font-size: 1.5rem;
+    border: none;
+    padding: 10px 14px;
+    background-color: $fancy-font-color;
+    color: #7d3a3a;
+    outline: none;
+    border-radius: 5px;
+
+    transition: background-color 100ms;
+
+    &:hover {
+      background-color: darken($fancy-font-color, 10%);
+    }
+  }
 }

@@ -15,6 +15,17 @@ export class AnimatedGameObject extends GameObject {
         }
     }
 
+    destroy() {
+        super.destroy();
+        if (this.skeleton && this.scene) {
+            this.scene.getScene().remove(this.skeleton);
+            this.skeleton.geometry.dispose();
+            if (this.skeleton.material instanceof THREE.Material) {
+                this.skeleton.material.dispose();
+            }
+        }
+    }
+
     async loadGLTF(modelPath: string) {
         let gltf = await super.loadGLTF(modelPath);
         if (gltf) {
