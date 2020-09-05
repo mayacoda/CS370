@@ -54,6 +54,8 @@ export class PhysicsEngine extends GameObject {
         // @ts-ignore
         groundBody.object = terrain;
 
+        terrain.setRigidBody(groundBody);
+
         this.physicsWorld.addRigidBody(groundBody);
     }
 
@@ -174,6 +176,11 @@ export class PhysicsEngine extends GameObject {
                         const gameObjectTag0 = gameObject0.tag;
                         const gameObjectTag1 = gameObject1.tag;
                         return (gameObjectTag0 === tag0 && gameObjectTag1 === tag1) || (gameObjectTag0 === tag1 && gameObjectTag1 === tag0)
+                    },
+                    involvesName: (name: string) => {
+                        const gameObjectName0 = gameObject0.getName();
+                        const gameObjectName1 = gameObject1.getName();
+                        return gameObjectName0 === name || gameObjectName1 === name;
                     }
                 })
             }
@@ -189,8 +196,7 @@ export class PhysicsEngine extends GameObject {
         super.update(time);
         if (!this.physicsWorld) throw new Error('PhysicsEngine.init not called or finished yet');
 
-        // @todo substeps > 1 means collisions are sometimes missed
-        this.physicsWorld.stepSimulation(time, 10);
+        this.physicsWorld.stepSimulation(time * 100 );
 
         this.dynamicObjects.forEach(object => {
             if (!this.tmpTransform) this.tmpTransform = new Ammo.btTransform();

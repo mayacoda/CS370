@@ -7,8 +7,6 @@ import Ammo from "ammojs-typed";
 import {PhysicsEngine} from "./PhysicsEngine";
 import {ServiceLocator} from "./ServiceLocator";
 import {RigidBodySettings} from "./interfaces/physics-interfaces";
-import {Vector3} from "../utilities";
-import {DecalGeometry} from 'three/examples/jsm/geometries/DecalGeometry'
 
 export class GameObject extends GameCycleEntity {
     object3D: THREE.Object3D;
@@ -18,8 +16,6 @@ export class GameObject extends GameCycleEntity {
     protected scene: GameScene | null = null;
 
     protected rb?: Ammo.btRigidBody;
-
-    protected decals: THREE.Mesh[] = []
 
     constructor() {
         super();
@@ -47,6 +43,11 @@ export class GameObject extends GameCycleEntity {
         if (this.rb) {
             const physics = ServiceLocator.getService<PhysicsEngine>('physics');
             physics.removeRigidBody(this.rb);
+        }
+
+        if (this.object3D instanceof THREE.Mesh) {
+            this.object3D.geometry.dispose();
+            (this.object3D.material as THREE.Material).dispose();
         }
 
         super.destroy();
@@ -108,33 +109,6 @@ export class GameObject extends GameCycleEntity {
                 }
             }
         })
-    }
-
-    addDecal(texture: THREE.Texture, pos: Vector3, normal: Vector3) {
-        if (!(this.object3D instanceof THREE.Mesh)) throw new Error('Cannot apply a decal to an object that does not have a mesh');
-
-        const material = new THREE.MeshPhongMaterial({
-            map: texture,
-            transparent: true,
-            depthTest: true,
-            depthWrite: false,
-            polygonOffset: true,
-            polygonOffsetFactor: -4,
-            wireframe: false
-        });
-
-        const position = new THREE.Vector3(pos.x, pos.y, pos.z);
-        const orientation = new THREE.Euler(normal.x, normal.y, normal.z);
-
-        const decal = new THREE.Mesh(new DecalGeometry(this.object3D, position, orientation, new THREE.Vector3(10, 10, 10)), material);
-
-        this.decals.push(decal);
-        this.scene?.getScene().add(decal)
-    }
-
-    removeAllDecals() {
-        this.decals.forEach(decal => this.scene?.getScene().remove(decal));
-        this.decals = []
     }
 
     setScene(scene: GameScene | null) {
@@ -235,5 +209,9 @@ export class GameObject extends GameCycleEntity {
     createRigidBody(settings: RigidBodySettings) {
         const physics = ServiceLocator.getService<PhysicsEngine>('physics');
         this.rb = physics.createRigidBody({...settings, object: this});
+    }
+
+    getName() {
+        return this.object3D.name;
     }
 }

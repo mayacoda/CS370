@@ -102,6 +102,18 @@ export class GameScene extends GameCycleEntity {
         }
     }
 
+    destroy() {
+        super.destroy();
+
+        for (const object of this.objects) {
+            object.destroy();
+        }
+
+        if (this.terrain) {
+            this.terrain.destroy();
+        }
+    }
+
     async loadTerrain(heightMap: string, texture: string, settings: TerrainSettings) {
         this.terrain = new Terrain();
         await this.terrain.loadTerrain(heightMap, texture, settings);

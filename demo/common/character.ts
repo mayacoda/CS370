@@ -25,7 +25,7 @@ export async function loadCharacter(scene: GameScene) {
     dog.playAnimation(state);
 
     dog.onUpdate(() => {
-        if (GameInput.KeyBoardInput === null && state !== DogState.idle) {
+        if (!GameInput.isKeyPressed('KeyW') && state !== DogState.idle) {
             dog.crossFadeAnimationImmediate(state, DogState.idle);
             state = DogState.idle;
             return;
@@ -36,7 +36,7 @@ export async function loadCharacter(scene: GameScene) {
                 if (state === DogState.idle) {
                     dog.crossFadeAnimationImmediate(DogState.idle, DogState.running);
                 } else if (state === DogState.walking) {
-                    dog.crossFadeAnimation(DogState.walking, DogState.running, .5);
+                    dog.crossFadeAnimation(DogState.walking, DogState.running, .25);
                 }
 
                 state = DogState.running
@@ -45,7 +45,7 @@ export async function loadCharacter(scene: GameScene) {
                 if (state === DogState.idle) {
                     dog.crossFadeAnimationImmediate(DogState.idle, DogState.walking);
                 } else if (state === DogState.running) {
-                    dog.crossFadeAnimation(DogState.running, DogState.walking, 1.5);
+                    dog.crossFadeAnimation(DogState.running, DogState.walking, .5);
                 }
 
                 state = DogState.walking
@@ -61,11 +61,11 @@ export async function loadCharacter(scene: GameScene) {
         }
 
         if (GameInput.isKeyPressed('KeyA')) {
-            dog.rotate(0, .06, 0);
+            dog.rotate(0, .08, 0);
         }
 
         if (GameInput.isKeyPressed('KeyD')) {
-            dog.rotate(0, -.06, 0);
+            dog.rotate(0, -.08, 0);
         }
     })
 

@@ -7,12 +7,12 @@ import {Terrain} from "../../engine-lib/data/Terrain";
 import {randomRange} from "../../engine-lib/utilities";
 import {CollisionData} from "../../engine-lib/data/interfaces/physics-interfaces";
 
-export function launchBall(scene: GameScene, position: THREE.Vector3) {
+export function launchBall(scene: GameScene, position: THREE.Vector3, color: string) {
     const radius = 0.15;
     const ball = new GameObject();
 
     ball.createMesh(new THREE.SphereGeometry(radius, 20, 20), new THREE.MeshPhongMaterial({
-        color: '#c6c611',
+        color,
         transparent: true
     }))
     ball.translate(position.x, position.y + 5, position.z);
@@ -41,9 +41,11 @@ export function launchBall(scene: GameScene, position: THREE.Vector3) {
 
         const physics = ServiceLocator.getService<PhysicsEngine>('physics');
 
-        const collision = Array.from(physics.detectedCollisions).find(collision => collision.isOfTags('ball', 'terrain'))
+        const collision = Array.from(physics.detectedCollisions).find(collision => {
+            return collision.isOfTags('ball', 'terrain') && collision.involvesName(ball.getName());
+        })
 
-        if (collision) markCollision(scene, collision, hits)
+        if (collision) markCollision(scene, collision, hits, color)
     })
 
     ball.castShadow(true);
@@ -56,7 +58,10 @@ export function launchBall(scene: GameScene, position: THREE.Vector3) {
 }
 
 
-function markCollision(scene: GameScene, collision: CollisionData, hits: GameObject[]) {
+function markCollision(scene: GameScene,
+                       collision: CollisionData,
+                       hits: GameObject[],
+                       color: string) {
     const ballObject = collision.object0.object.tag === 'ball' ? collision.object0 : collision.object1
     const terrainObject = collision.object0.object.tag === 'terrain' ? collision.object0 : collision.object1
     let terrain = terrainObject.object as Terrain;
@@ -72,7 +77,7 @@ function markCollision(scene: GameScene, collision: CollisionData, hits: GameObj
 
     const circle = new GameObject();
     circle.createMesh(new THREE.CircleGeometry(.2, 32), new THREE.MeshBasicMaterial({
-        color: '#c6c611',
+        color,
         side: THREE.DoubleSide
     }))
 
@@ -90,4 +95,16 @@ function markCollision(scene: GameScene, collision: CollisionData, hits: GameObj
 
     hits.push(circle);
     scene.addObject(circle);
+}
+
+export function hideBall(ball: GameObject) {
+    if (ball.object3D instanceof THREE.Mesh) {
+        const material = ball.object3D.material as THREE.Material;
+        material.opacity = 0;
+    }
+}
+
+export function removeBall(ball: GameObject, hits: GameObject[]) {
+    hits.forEach(hit => hit.destroy());
+    ball.destroy();
 }

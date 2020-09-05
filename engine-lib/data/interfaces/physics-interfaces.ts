@@ -51,6 +51,7 @@ export interface CollisionData {
     object0: CollisionObjectData
     object1: CollisionObjectData
     isOfTags: (tag0: string, tag1: string) => boolean
+    involvesName: (name: string) => boolean;
 }
 
 interface CollisionObjectData {

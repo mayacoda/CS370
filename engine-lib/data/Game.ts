@@ -13,6 +13,9 @@ export class Game extends GameCycleEntity {
     private renderEngine: RenderEngine
     private physicsEngine: PhysicsEngine
 
+    private loadStartCallback = () => {}
+    private loadEndCallback = () => {}
+
     constructor(canvas: HTMLCanvasElement) {
         super();
         ServiceLocator.setService('canvas', canvas);
@@ -20,7 +23,7 @@ export class Game extends GameCycleEntity {
         this.physicsEngine = new PhysicsEngine();
     }
 
-    addScene(scene: GameScene, sceneName: string) {
+    addScene(sceneName: string, scene: GameScene) {
         if (this.scenes.has(sceneName)) {
             throw new Error(`scene ${sceneName} already exists in the game`)
         }
@@ -29,7 +32,8 @@ export class Game extends GameCycleEntity {
     }
 
     removeScene(sceneName: string) {
-        if (!this.scenes.has(sceneName)) {
+        const toRemove = this.scenes.get(sceneName);
+        if (!toRemove) {
             throw new Error(`could not find and remove scene ${sceneName}`)
         }
 
@@ -38,6 +42,7 @@ export class Game extends GameCycleEntity {
 
     loadScene(sceneName: string) {
         const toLoad = this.scenes.get(sceneName)
+        const oldScene = this.currentScene;
 
         if (!toLoad) {
             throw new Error(`could find and load scene ${sceneName}`)
@@ -47,6 +52,10 @@ export class Game extends GameCycleEntity {
         this.currentScene.start();
 
         ServiceLocator.setService('scene', this.currentScene.getScene())
+
+        if (oldScene) {
+            oldScene.destroy();
+        }
     }
 
     getCurrentScene(): GameScene {
@@ -71,5 +80,21 @@ export class Game extends GameCycleEntity {
     destroy() {
         super.destroy();
         this.currentScene.destroy();
+    }
+
+    onLoadStart(callback: () => void) {
+        this.loadStartCallback = callback;
+    }
+
+    onLoadEnd(callback: () => void) {
+        this.loadEndCallback = callback;
+    }
+
+    startLoad() {
+        this.loadStartCallback();
+    }
+
+    endLoad() {
+        this.loadEndCallback();
     }
 }

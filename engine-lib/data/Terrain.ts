@@ -3,6 +3,7 @@ import {TextureLoader} from "./TextureLoader";
 import * as THREE from "three";
 import {ServiceLocator} from "./ServiceLocator";
 import {PhysicsEngine} from "./PhysicsEngine";
+import Ammo from "ammojs-typed";
 
 
 export interface TerrainSettings {
@@ -73,6 +74,16 @@ export class Terrain extends GameObject {
         }
     }
 
+    destroy() {
+        super.destroy();
+        if (this.object3D instanceof THREE.Mesh) {
+            this.object3D.geometry.dispose();
+            if (this.object3D.material instanceof THREE.Material) {
+                this.object3D.material.dispose();
+            }
+        }
+    }
+
     getHeightAtPoint(x: number, z: number) {
         const raycaster = new THREE.Raycaster(new THREE.Vector3(x, this.maxHeight + 0.1, z), new THREE.Vector3(0, -1, 0));
         const intersects = raycaster.intersectObject(this.object3D);
@@ -104,6 +115,10 @@ export class Terrain extends GameObject {
             depthExtents: this.depthExtents,
             maxHeight: this.maxHeight
         };
+    }
+
+    setRigidBody(groundBody: Ammo.btRigidBody) {
+        this.rb = groundBody;
     }
 }
 

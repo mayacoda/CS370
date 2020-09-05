@@ -46,6 +46,10 @@ export class GameUI extends GameCycleEntity {
         this.uiLayer.style.cssText = DEFAULT_STYLE + cssText;
     }
 
+    removeElement(element: HTMLElement) {
+        this.uiLayer.removeChild(element);
+    }
+
     destroy() {
         super.destroy();
         document.removeChild(this.uiLayer);

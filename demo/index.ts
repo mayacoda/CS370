@@ -8,18 +8,24 @@ async function init() {
 
     // start the game
     const game = new Game(canvas);
+    game.startLoad();
     await game.preload()
 
     // load the first level
     await loadLevel1(game);
 
-    // set current scene to first level
-    game.loadScene( 'level 1');
+    game.onLoadStart(() => {
+        const loader = document.querySelector('.loading') as HTMLElement;
+        loader.style.opacity = '1';
+    })
+
+    game.onLoadEnd(() => {
+        const loader = document.querySelector('.loading') as HTMLElement;
+        loader.style.opacity = '0';
+    })
+
     game.start();
+    game.endLoad();
 }
 
-init().then(() => {
-    const loader = document.querySelector('.loading') as HTMLElement;
-    loader.style.opacity = '0';
-    console.log('Game is ready')
-})
+init();
