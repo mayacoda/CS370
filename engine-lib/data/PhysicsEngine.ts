@@ -3,12 +3,13 @@ import {Terrain} from "./Terrain";
 import {ServiceLocator} from "./ServiceLocator";
 import {GameObject} from "./GameObject";
 import {CollisionData, RigidBodySettings} from "./interfaces/physics-interfaces";
+import {GameCycleEntity} from "./GameCycleEntity";
 
 export type ColliderType = 'box' | 'cylinder' | 'cone' | 'sphere'
 
 const STATE = {DISABLE_DEACTIVATION: 4}
 
-export class PhysicsEngine extends GameObject {
+export class PhysicsEngine extends GameCycleEntity {
     private physicsWorld?: Ammo.btDiscreteDynamicsWorld;
     private dynamicObjects = new Set<GameObject>();
     private tmpTransform?: Ammo.btTransform;

@@ -86,8 +86,7 @@ function incrementTime(scene: GameScene) {
     if (time > (LEVEL_2_TIME_LIMIT * 60)) {
         showExclamation(scene, 'Time is up!');
         window.clearInterval(interval);
-        setTimeout(loseCallback, 3000);
-
+        loseCallback();
     }
 }
 

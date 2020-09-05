@@ -1,6 +1,5 @@
 import {GameScene} from "../../engine-lib/data";
 import {randomRangeInt} from "../../engine-lib/utilities";
-import {LEVEL_1_SCORE} from "../level1/gameplay";
 
 let timeout: number;
 
@@ -77,7 +76,7 @@ export function writeNewScore(scene: GameScene, score: number) {
 
 export function getExclamationText(score: number, maxScore: number) {
     if (score === Math.floor(maxScore / 2)) return 'Half way there!'
-    if (score === LEVEL_1_SCORE - 1) return 'One more to go!'
+    if (score === maxScore - 1) return 'One more to go!'
 
     return ['Score!', 'Awesome!', 'Keep Going!'][randomRangeInt(0,2)]
 }
