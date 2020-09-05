@@ -1,9 +1,9 @@
-import * as THREE from 'three';
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass.js';
 import {ShaderPass} from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import {ServiceLocator} from "../ServiceLocator";
+import {Scene, Camera, WebGLRenderer, Vector2} from 'three';
 
 // language=GLSL
 const vertexShader = `
@@ -33,13 +33,13 @@ void main() {
 `
 
 export function UnrealBloom({bloomThreshold = 0, bloomStrength = 5, bloomRadius = 0, exposure = 1}) {
-    const scene = ServiceLocator.getService<THREE.Scene>('scene');
-    const camera = ServiceLocator.getService<THREE.Camera>('camera');
-    const renderer = ServiceLocator.getService<THREE.WebGLRenderer>('renderer');
+    const scene = ServiceLocator.getService<Scene>('scene');
+    const camera = ServiceLocator.getService<Camera>('camera');
+    const renderer = ServiceLocator.getService<WebGLRenderer>('renderer');
 
     const renderScene = new RenderPass(scene, camera);
 
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    const bloomPass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
     bloomPass.threshold = bloomThreshold;
     bloomPass.strength = bloomStrength;
     bloomPass.radius = bloomRadius;
@@ -50,7 +50,7 @@ export function UnrealBloom({bloomThreshold = 0, bloomStrength = 5, bloomRadius 
     bloomComposer.addPass(bloomPass);
 
     const finalPass = new ShaderPass(
-        new THREE.ShaderMaterial({
+        new ShaderMaterial({
             uniforms: {
                 baseTexture: {value: null},
                 bloomTexture: {value: bloomComposer.renderTarget2.texture}

@@ -1,12 +1,12 @@
 import {GameObject} from "./GameObject";
-import * as THREE from "three";
+import {Camera, Vector3, PerspectiveCamera, OrthographicCamera} from "three";
 import {ServiceLocator} from "./ServiceLocator";
 
 export class GameCamera extends GameObject {
-    camera: THREE.Camera;
+    camera: Camera;
     private lookAtTarget?: GameObject;
     private followTarget?: GameObject;
-    private followOffset = new THREE.Vector3();
+    private followOffset = new Vector3();
 
     private parent?: GameObject;
 
@@ -25,10 +25,10 @@ export class GameCamera extends GameObject {
 
         switch (type) {
             case "perspective":
-                this.camera = new THREE.PerspectiveCamera(40, width / height);
+                this.camera = new PerspectiveCamera(40, width / height);
                 break;
             case "orthographic":
-                this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
+                this.camera = new OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
                 break;
         }
 
@@ -41,7 +41,7 @@ export class GameCamera extends GameObject {
 
     follow(target: GameObject, x = 0, y = 0, z = 0) {
         this.followTarget = target;
-        this.followOffset = new THREE.Vector3(x, y, z);
+        this.followOffset = new Vector3(x, y, z);
 
         const parent = new GameObject();
         parent.object3D.name = 'Camera Parent'

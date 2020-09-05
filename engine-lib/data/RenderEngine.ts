@@ -1,30 +1,30 @@
-import * as THREE from "three";
 import {Game} from "./Game";
 import {ServiceLocator} from "./ServiceLocator";
+import {WebGLRenderer, Clock, PCFShadowMap, Camera, PerspectiveCamera} from "three";
 
 export class RenderEngine {
-    private readonly renderer: THREE.WebGLRenderer;
-    private readonly clock: THREE.Clock;
+    private readonly renderer: WebGLRenderer;
+    private readonly clock: Clock;
 
     constructor(canvas: HTMLCanvasElement, private game: Game) {
-        this.clock = new THREE.Clock();
+        this.clock = new Clock();
 
-        this.renderer = new THREE.WebGLRenderer({antialias: true, canvas});
+        this.renderer = new WebGLRenderer({antialias: true, canvas});
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFShadowMap;
+        this.renderer.shadowMap.type = PCFShadowMap;
 
         ServiceLocator.setService('renderer', this.renderer)
 
         window.addEventListener('resize', () => {
-            const camera = ServiceLocator.getService<THREE.Camera>('camera');
-            if (camera instanceof THREE.PerspectiveCamera) {
+            const camera = ServiceLocator.getService<Camera>('camera');
+            if (camera instanceof PerspectiveCamera) {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
             }
 
-            this.renderer.setSize( window.innerWidth, window.innerHeight );
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
         }, false);
     }
 
@@ -41,7 +41,7 @@ export class RenderEngine {
             const currentGameScene = this.game.getCurrentScene();
             const scene = currentGameScene.getScene();
 
-            const camera = ServiceLocator.getService<THREE.Camera>('camera');
+            const camera = ServiceLocator.getService<Camera>('camera');
             this.renderer.render(scene, camera);
         }
         step();

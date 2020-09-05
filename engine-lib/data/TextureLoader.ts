@@ -1,15 +1,15 @@
-import * as THREE from 'three'
+import { Texture, CubeTextureLoader, TextureLoader as THREETextureLoader } from "three";
 
 export class TextureLoader {
-    static loadCubeTexture(texturePaths: string[]): Promise<THREE.Texture>  {
-        const loader = new THREE.CubeTextureLoader();
+    static loadCubeTexture(texturePaths: string[]): Promise<Texture>  {
+        const loader = new CubeTextureLoader();
         return new Promise((resolve, reject) => {
             loader.load(texturePaths, resolve, () => {}, reject);
         })
     }
 
-    static loadTexture(texturePath: string): Promise<THREE.Texture> {
-        const loader = new THREE.TextureLoader();
+    static loadTexture(texturePath: string): Promise<Texture> {
+        const loader = new THREETextureLoader();
         return new Promise((resolve, reject) => {
             loader.load(texturePath, resolve, () => {}, reject)
         })

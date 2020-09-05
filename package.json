@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "parcel demo/index.html",
-    "build": "parcel build demo/index.html"
+    "build": "parcel build demo/index.html --no-source-maps"
   },
   "eslintConfig": {
     "extends": "react-app"

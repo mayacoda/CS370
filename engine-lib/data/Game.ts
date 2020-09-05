@@ -3,9 +3,9 @@ import {RenderEngine} from "./RenderEngine";
 import {GameCycleEntity} from "./GameCycleEntity";
 import {ServiceLocator} from "./ServiceLocator";
 import {PhysicsEngine} from "./PhysicsEngine";
-import * as THREE from 'three';
+import {Cache} from 'three';
 
-THREE.Cache.enabled = true;
+Cache.enabled = true;
 
 export class Game extends GameCycleEntity {
     private currentScene = new GameScene();

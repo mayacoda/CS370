@@ -1,4 +1,3 @@
-import * as THREE from "three"
 import {GameCycleEntity} from "./GameCycleEntity";
 import {ModelLoader} from "./ModelLoader";
 import {GameScene} from "./GameScene";
@@ -7,9 +6,19 @@ import Ammo from "ammojs-typed";
 import {PhysicsEngine} from "./PhysicsEngine";
 import {ServiceLocator} from "./ServiceLocator";
 import {RigidBodySettings} from "./interfaces/physics-interfaces";
+import {
+    Vector3,
+    Object3D,
+    Mesh,
+    Material,
+    Geometry,
+    MeshPhongMaterial,
+    Color,
+    DoubleSide
+} from "three";
 
 export class GameObject extends GameCycleEntity {
-    object3D: THREE.Object3D;
+    object3D: Object3D;
     tag: string = '';
 
     protected children: Set<GameObject>;
@@ -19,7 +28,7 @@ export class GameObject extends GameCycleEntity {
 
     constructor() {
         super();
-        this.object3D = new THREE.Object3D();
+        this.object3D = new Object3D();
         this.children = new Set<GameObject>();
     }
 
@@ -45,9 +54,9 @@ export class GameObject extends GameCycleEntity {
             physics.removeRigidBody(this.rb);
         }
 
-        if (this.object3D instanceof THREE.Mesh) {
+        if (this.object3D instanceof Mesh) {
             this.object3D.geometry.dispose();
-            (this.object3D.material as THREE.Material).dispose();
+            (this.object3D.material as Material).dispose();
         }
 
         super.destroy();
@@ -63,8 +72,8 @@ export class GameObject extends GameCycleEntity {
         this.children.delete(object)
     }
 
-    createMesh(geometry?: THREE.Geometry, material?: THREE.Material) {
-        this.object3D = new THREE.Mesh(geometry, material)
+    createMesh(geometry?: Geometry, material?: Material) {
+        this.object3D = new Mesh(geometry, material)
     }
 
     async loadObj(modelPath: string, materialPath: string) {
@@ -83,12 +92,12 @@ export class GameObject extends GameCycleEntity {
         this.object3D = fbx;
 
         this.object3D.traverse(child => {
-            if (child instanceof THREE.Mesh) {
+            if (child instanceof Mesh) {
                 let material = child.material;
-                if (material instanceof THREE.MeshPhongMaterial) {
+                if (material instanceof MeshPhongMaterial) {
                     material.shininess = 0;
-                    material.color = new THREE.Color('#fff')
-                    material.specular = new THREE.Color('#fff')
+                    material.color = new Color('#fff')
+                    material.specular = new Color('#fff')
                 }
             }
         })
@@ -99,12 +108,12 @@ export class GameObject extends GameCycleEntity {
     async loadTransparentTexture(path: string) {
         const texture = await TextureLoader.loadTexture(path);
         this.object3D.traverse(child => {
-            if (child instanceof THREE.Mesh) {
+            if (child instanceof Mesh) {
                 let material = child.material;
                 if (!Array.isArray(material)) {
                     material.map = texture;
                     material.transparent = true;
-                    material.side = THREE.DoubleSide;
+                    material.side = DoubleSide;
                     material.alphaTest = 0.5;
                 }
             }
@@ -130,13 +139,13 @@ export class GameObject extends GameCycleEntity {
     }
 
     rotate(x?: number, y?: number, z?: number): void
-    rotate(vec3: THREE.Vector3): void
+    rotate(vec3: Vector3): void
     rotate(...args: any[]) {
-        let vec3: THREE.Vector3
-        if (args[0] instanceof THREE.Vector3) {
+        let vec3: Vector3
+        if (args[0] instanceof Vector3) {
             vec3 = args[0]
         } else {
-            vec3 = new THREE.Vector3(args[0], args[1], args[2])
+            vec3 = new Vector3(args[0], args[1], args[2])
         }
         this.object3D.rotateX(vec3.x)
         this.object3D.rotateY(vec3.y)
@@ -144,16 +153,16 @@ export class GameObject extends GameCycleEntity {
     }
 
     scale(size: number): void
-    scale(vec3: THREE.Vector3): void
+    scale(vec3: Vector3): void
     scale(x?: number, y?: number, z?: number): void
     scale(...args: any[]) {
-        let vec3: THREE.Vector3
-        if (args[0] instanceof THREE.Vector3) {
+        let vec3: Vector3
+        if (args[0] instanceof Vector3) {
             vec3 = args[0]
         } else if (args.length === 3) {
-            vec3 = new THREE.Vector3(args[0], args[1], args[2])
+            vec3 = new Vector3(args[0], args[1], args[2])
         } else {
-            vec3 = new THREE.Vector3(args[0], args[0], args[0])
+            vec3 = new Vector3(args[0], args[0], args[0])
         }
         this.object3D.scale.x = vec3.x;
         this.object3D.scale.y = vec3.y;
@@ -161,13 +170,13 @@ export class GameObject extends GameCycleEntity {
     }
 
     translate(x?: number, y?: number, z?: number): void
-    translate(vec3: THREE.Vector3): void
+    translate(vec3: Vector3): void
     translate(...args: any[]) {
-        let vec3: THREE.Vector3
-        if (args[0] instanceof THREE.Vector3) {
+        let vec3: Vector3
+        if (args[0] instanceof Vector3) {
             vec3 = args[0]
         } else {
-            vec3 = new THREE.Vector3(args[0], args[1], args[2])
+            vec3 = new Vector3(args[0], args[1], args[2])
         }
         this.object3D.translateX(vec3.x)
         this.object3D.translateY(vec3.y)
@@ -194,7 +203,7 @@ export class GameObject extends GameCycleEntity {
         this.object3D.name = name;
     }
 
-    getMeshGroupByName(name: string): Promise<THREE.Object3D | null> {
+    getMeshGroupByName(name: string): Promise<Object3D | null> {
         return new Promise((resolve) => {
             this.object3D.traverse(child => {
                 if (child.name === name) {

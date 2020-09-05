@@ -1,9 +1,17 @@
 import {GameObject} from "./GameObject";
 import {TextureLoader} from "./TextureLoader";
-import * as THREE from "three";
 import {ServiceLocator} from "./ServiceLocator";
 import {PhysicsEngine} from "./PhysicsEngine";
 import Ammo from "ammojs-typed";
+import {
+    Material,
+    Mesh,
+    Vector3,
+    Raycaster,
+    MeshToonMaterial,
+    RepeatWrapping,
+    PlaneBufferGeometry
+} from "three";
 
 
 export interface TerrainSettings {
@@ -39,7 +47,7 @@ export class Terrain extends GameObject {
         this.width = image.width;
         this.depth = image.height;
 
-        const plane = new THREE.PlaneBufferGeometry(widthExtents, depthExtents, image.width - 1, image.height - 1);
+        const plane = new PlaneBufferGeometry(widthExtents, depthExtents, image.width - 1, image.height - 1);
         plane.rotateX(-Math.PI / 2);
 
         this.normalizedHeightData = await readHeightData(image);
@@ -56,12 +64,12 @@ export class Terrain extends GameObject {
         plane.computeVertexNormals();
 
         const map = await TextureLoader.loadTexture(texture)
-        map.wrapS = THREE.RepeatWrapping;
-        map.wrapT = THREE.RepeatWrapping;
+        map.wrapS = RepeatWrapping;
+        map.wrapT = RepeatWrapping;
         map.repeat.set(repeat, repeat)
 
-        const groundMaterial = new THREE.MeshToonMaterial({map, color})
-        this.object3D = new THREE.Mesh(plane, groundMaterial);
+        const groundMaterial = new MeshToonMaterial({map, color})
+        this.object3D = new Mesh(plane, groundMaterial);
         this.object3D.receiveShadow = true;
         this.object3D.name = 'Terrain';
     }
@@ -76,16 +84,16 @@ export class Terrain extends GameObject {
 
     destroy() {
         super.destroy();
-        if (this.object3D instanceof THREE.Mesh) {
+        if (this.object3D instanceof Mesh) {
             this.object3D.geometry.dispose();
-            if (this.object3D.material instanceof THREE.Material) {
+            if (this.object3D.material instanceof Material) {
                 this.object3D.material.dispose();
             }
         }
     }
 
     getHeightAtPoint(x: number, z: number) {
-        const raycaster = new THREE.Raycaster(new THREE.Vector3(x, this.maxHeight + 0.1, z), new THREE.Vector3(0, -1, 0));
+        const raycaster = new Raycaster(new Vector3(x, this.maxHeight + 0.1, z), new Vector3(0, -1, 0));
         const intersects = raycaster.intersectObject(this.object3D);
 
         let intersection = intersects[0];
@@ -93,7 +101,7 @@ export class Terrain extends GameObject {
     }
 
     getNormalAtPoint(x: number, z: number) {
-        const raycaster = new THREE.Raycaster(new THREE.Vector3(x, this.maxHeight + 0.1, z), new THREE.Vector3(0, -1, 0));
+        const raycaster = new Raycaster(new Vector3(x, this.maxHeight + 0.1, z), new Vector3(0, -1, 0));
         const intersects = raycaster.intersectObject(this.object3D);
 
         const intersection = intersects[0];

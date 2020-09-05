@@ -1,24 +1,39 @@
 import {GameObject} from "./GameObject";
-import * as THREE from "three";
 import {GameCycleEntity} from "./GameCycleEntity";
 import {TextureLoader} from "./TextureLoader";
 import {ServiceLocator} from "./ServiceLocator";
 import {Terrain, TerrainSettings} from "./Terrain";
 import {GameUI} from "./GameUI";
+import {
+    Vector3,
+    Vector2,
+    WebGLRenderer,
+    Raycaster,
+    Camera,
+    Scene,
+    Mesh,
+    LinearFilter,
+    ShaderLib,
+    ShaderMaterial,
+    BackSide,
+    BoxBufferGeometry,
+    Color,
+    FogExp2
+} from "three";
 
 export class GameScene extends GameCycleEntity {
     private objects: Set<GameObject>
-    private scene: THREE.Scene
+    private scene: Scene
 
     private gui: GameUI;
 
-    private skyboxMesh?: THREE.Mesh;
+    private skyboxMesh?: Mesh;
     private terrain?: Terrain;
 
     constructor() {
         super();
         this.objects = new Set<GameObject>();
-        this.scene = new THREE.Scene();
+        this.scene = new Scene();
         this.gui = new GameUI();
     }
 
@@ -52,31 +67,31 @@ export class GameScene extends GameCycleEntity {
         } else {
             // equirectangular map
             const skybox = await TextureLoader.loadTexture(texture);
-            skybox.magFilter = THREE.LinearFilter;
-            skybox.minFilter = THREE.LinearFilter;
+            skybox.magFilter = LinearFilter;
+            skybox.minFilter = LinearFilter;
 
-            const shader = THREE.ShaderLib.equirect;
-            const material = new THREE.ShaderMaterial({
+            const shader = ShaderLib.equirect;
+            const material = new ShaderMaterial({
                 fragmentShader: shader.fragmentShader,
                 vertexShader: shader.vertexShader,
                 uniforms: shader.uniforms,
                 depthWrite: false,
-                side: THREE.BackSide,
+                side: BackSide,
             });
             material.uniforms.tEquirect.value = skybox;
-            const plane = new THREE.BoxBufferGeometry(1, 1, 1);
-            this.skyboxMesh = new THREE.Mesh(plane, material);
+            const plane = new BoxBufferGeometry(1, 1, 1);
+            this.skyboxMesh = new Mesh(plane, material);
             this.skyboxMesh.name = 'SkyBox';
             this.scene.add(this.skyboxMesh);
         }
     }
 
     setBackgroundColor(color: string | number) {
-        this.scene.background = new THREE.Color(color)
+        this.scene.background = new Color(color)
     }
 
     setFog(color: string | number, density?: number) {
-        this.scene.fog = new THREE.FogExp2(color, density)
+        this.scene.fog = new FogExp2(color, density)
     }
 
     start() {
@@ -94,7 +109,7 @@ export class GameScene extends GameCycleEntity {
     update(time?: number): void {
         super.update(time);
         if (this.skyboxMesh) {
-            this.skyboxMesh.position.copy(ServiceLocator.getService<THREE.Camera>('camera').position)
+            this.skyboxMesh.position.copy(ServiceLocator.getService<Camera>('camera').position)
         }
 
         for (const object of this.objects) {
@@ -120,8 +135,8 @@ export class GameScene extends GameCycleEntity {
         this.scene.add(this.terrain.object3D)
     }
 
-    convertWorldPointToTerrainPoint(x: number, y: number, z: number): THREE.Vector3
-    convertWorldPointToTerrainPoint(x: number, z: number): THREE.Vector3
+    convertWorldPointToTerrainPoint(x: number, y: number, z: number): Vector3
+    convertWorldPointToTerrainPoint(x: number, z: number): Vector3
     convertWorldPointToTerrainPoint(...args: number[]) {
         let x = 0, y, z = 0, yDiff = 0;
         if (args.length === 3) {
@@ -134,27 +149,27 @@ export class GameScene extends GameCycleEntity {
         }
 
         y = this.terrain ? this.terrain.getHeightAtPoint(x, z) || 0 : 0;
-        return new THREE.Vector3(x, y + yDiff, z);
+        return new Vector3(x, y + yDiff, z);
     }
 
     convertScreenPointToTerrainPoint(x: number = 0, y: number = 0) {
         if (!this.terrain) return null;
 
-        const mouse = new THREE.Vector2();
-        const size = new THREE.Vector2();
-        ServiceLocator.getService<THREE.WebGLRenderer>('renderer').getSize(size);
+        const mouse = new Vector2();
+        const size = new Vector2();
+        ServiceLocator.getService<WebGLRenderer>('renderer').getSize(size);
 
         mouse.x = (x / size.x) * 2 - 1;
         mouse.y = (y / size.y) * 2 + 1;
 
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(mouse, ServiceLocator.getService<THREE.Camera>('camera'));
+        const raycaster = new Raycaster();
+        raycaster.setFromCamera(mouse, ServiceLocator.getService<Camera>('camera'));
         const intersects = raycaster.intersectObject(this.terrain.object3D);
 
         return (intersects && intersects[0]) ? intersects[0].point : null;
     }
 
-    getTerrainNormalAtPoint(x: number, z: number): THREE.Vector3 | null {
+    getTerrainNormalAtPoint(x: number, z: number): Vector3 | null {
         return this.terrain ? this.terrain.getNormalAtPoint(x, z) : null
     }
 }

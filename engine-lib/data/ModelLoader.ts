@@ -3,9 +3,7 @@ import {MTLLoader} from 'three/examples/jsm/loaders/MTLLoader'
 import {GLTFLoader, GLTF} from 'three/examples/jsm/loaders/GLTFLoader'
 import {FBXLoader} from 'three/examples/jsm/loaders/FBXLoader'
 import {getExtension} from "../utilities";
-import {Cache, Group, AnimationClip} from 'three';
-
-Cache.enabled = true
+import {Group, AnimationClip} from 'three';
 
 function onProgress(xhr: ProgressEvent) {
     if (xhr.lengthComputable) {

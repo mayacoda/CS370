@@ -1,11 +1,18 @@
 import {GameObject} from "./GameObject";
-import * as THREE from "three";
+import {
+    Material,
+    AnimationClip,
+    AnimationMixer,
+    SkeletonHelper,
+    AnimationAction,
+    Event
+} from "three";
 
 export class AnimatedGameObject extends GameObject {
-    animationActions: Map<string, THREE.AnimationAction> = new Map<string, THREE.AnimationAction>();
+    animationActions: Map<string, AnimationAction> = new Map<string, AnimationAction>();
 
-    private mixer?: THREE.AnimationMixer;
-    private skeleton?: THREE.SkeletonHelper;
+    private mixer?: AnimationMixer;
+    private skeleton?: SkeletonHelper;
 
     start() {
         super.start();
@@ -20,7 +27,7 @@ export class AnimatedGameObject extends GameObject {
         if (this.skeleton && this.scene) {
             this.scene.getScene().remove(this.skeleton);
             this.skeleton.geometry.dispose();
-            if (this.skeleton.material instanceof THREE.Material) {
+            if (this.skeleton.material instanceof Material) {
                 this.skeleton.material.dispose();
             }
         }
@@ -40,17 +47,17 @@ export class AnimatedGameObject extends GameObject {
         }
     }
 
-    private loadAnimations(object: { animations?: THREE.AnimationClip[] }) {
+    private loadAnimations(object: { animations?: AnimationClip[] }) {
 
         if (Array.isArray(object.animations) && object.animations.length) {
-            const mixer = new THREE.AnimationMixer(this.object3D);
+            const mixer = new AnimationMixer(this.object3D);
             object.animations.forEach(clip => {
                 this.animationActions.set(clip.name, mixer.clipAction(clip))
             })
             this.mixer = mixer;
         }
 
-        this.skeleton = new THREE.SkeletonHelper(this.object3D)
+        this.skeleton = new SkeletonHelper(this.object3D)
         this.skeleton.visible = false
 
         this.activateAllActions();
@@ -74,7 +81,7 @@ export class AnimatedGameObject extends GameObject {
         this.synchronizeCrossFade(startAction, endAction, duration);
     }
 
-    private setWeight(action: THREE.AnimationAction, weight: number) {
+    private setWeight(action: AnimationAction, weight: number) {
         action.enabled = true;
         action.setEffectiveWeight(weight);
     }
@@ -88,18 +95,22 @@ export class AnimatedGameObject extends GameObject {
         this.getAction(animation).setEffectiveTimeScale(scale)
     }
 
-    private executeCrossFade(startAction: THREE.AnimationAction, endAction: THREE.AnimationAction, duration: number) {
+    private executeCrossFade(startAction: AnimationAction,
+                             endAction: AnimationAction,
+                             duration: number) {
         this.setWeight(endAction, 1);
 
         endAction.time = 0;
         startAction.crossFadeTo(endAction, duration, true)
     }
 
-    private synchronizeCrossFade(startAction: THREE.AnimationAction, endAction: THREE.AnimationAction, duration: number) {
+    private synchronizeCrossFade(startAction: AnimationAction,
+                                 endAction: AnimationAction,
+                                 duration: number) {
         let mixer = this.mixer;
         if (!mixer) return
 
-        const onLoopFinished = (event: THREE.Event) => {
+        const onLoopFinished = (event: Event) => {
             if (event.action === startAction) {
                 mixer?.removeEventListener('loop', onLoopFinished)
 

@@ -1,5 +1,14 @@
 import {GameObject, GameScene} from "../../engine-lib/data";
-import * as THREE from 'three';
+import {
+    SphereGeometry,
+    Vector3,
+    CircleGeometry,
+    MeshBasicMaterial,
+    DoubleSide,
+    Mesh,
+    Material,
+    MeshPhongMaterial
+} from 'three';
 import Ammo from "ammojs-typed";
 import {ServiceLocator} from "../../engine-lib/data/ServiceLocator";
 import {PhysicsEngine} from "../../engine-lib/data/PhysicsEngine";
@@ -7,11 +16,11 @@ import {Terrain} from "../../engine-lib/data/Terrain";
 import {randomRange} from "../../engine-lib/utilities";
 import {CollisionData} from "../../engine-lib/data/interfaces/physics-interfaces";
 
-export function launchBall(scene: GameScene, position: THREE.Vector3, color: string) {
+export function launchBall(scene: GameScene, position: Vector3, color: string) {
     const radius = 0.15;
     const ball = new GameObject();
 
-    ball.createMesh(new THREE.SphereGeometry(radius, 20, 20), new THREE.MeshPhongMaterial({
+    ball.createMesh(new SphereGeometry(radius, 20, 20), new MeshPhongMaterial({
         color,
         transparent: true
     }))
@@ -28,9 +37,9 @@ export function launchBall(scene: GameScene, position: THREE.Vector3, color: str
             rollingFriction: 10
         });
 
-        const direction = new THREE.Vector3();
+        const direction = new Vector3();
         direction.copy(position);
-        let goal = new THREE.Vector3(0, position.y + 5, 0);
+        let goal = new Vector3(0, position.y + 5, 0);
         goal.sub(direction).normalize().multiplyScalar(randomRange(10, 15));
         ball.rigidBody?.applyCentralImpulse(new Ammo.btVector3(goal.x, goal.y, goal.z));
     });
@@ -76,9 +85,9 @@ function markCollision(scene: GameScene,
     }
 
     const circle = new GameObject();
-    circle.createMesh(new THREE.CircleGeometry(.2, 32), new THREE.MeshBasicMaterial({
+    circle.createMesh(new CircleGeometry(.2, 32), new MeshBasicMaterial({
         color,
-        side: THREE.DoubleSide
+        side: DoubleSide
     }))
 
     let {x, z, y} = ballObject.object.position;
@@ -98,8 +107,8 @@ function markCollision(scene: GameScene,
 }
 
 export function hideBall(ball: GameObject) {
-    if (ball.object3D instanceof THREE.Mesh) {
-        const material = ball.object3D.material as THREE.Material;
+    if (ball.object3D instanceof Mesh) {
+        const material = ball.object3D.material as Material;
         material.opacity = 0;
     }
 }
