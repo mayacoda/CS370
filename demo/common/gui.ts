@@ -1,11 +1,14 @@
 import {GameScene} from "../../engine-lib/data";
 import {randomRangeInt} from "../../engine-lib/utilities";
+import {createElement} from "./gui-util";
+import {createMenuButton, createPausePlayButton, createRestartButton} from "./gui-footer";
 
 let timeout: number;
 
-export function initGui(scene: GameScene) {
+export function initGui(scene: GameScene,
+                        callbacks: { pausePlayCallback: (state: boolean) => void, restartCallback: () => void }) {
     const gui = scene.getGUI();
-    gui.setDefaultGuiStyle('flex-direction: column;')
+    gui.setDefaultGuiStyle('flex-direction: column; justify-content: space-between')
 
     const header = createElement('header');
 
@@ -13,11 +16,24 @@ export function initGui(scene: GameScene) {
     const scoreElement = createElement('score');
     header.appendChild(scoreElement);
 
+    const {pausePlayCallback, restartCallback} = callbacks;
+
+    const footer = createElement('footer');
+    footer.appendChild(createMenuButton())
+    footer.appendChild(createPausePlayButton(pausePlayCallback))
+    footer.appendChild(createRestartButton(restartCallback))
+
     gui.addElement(header);
     gui.addElement(createElement('exclamation'))
+    gui.addElement(footer);
 }
 
 export function showInstructions(scene: GameScene, text: string[], onFinish: () => void) {
+    if (text.length === 0) {
+        onFinish();
+        return;
+    }
+
     const gui = scene.getGUI();
 
     const overlay = createElement('full-screen-overlay');
@@ -44,12 +60,6 @@ export function showInstructions(scene: GameScene, text: string[], onFinish: () 
             instructionsText.innerHTML = text[page];
         }
     })
-}
-
-function createElement(className: string, elementTag: string = 'div') {
-    const element = document.createElement(elementTag);
-    element.classList.add(className);
-    return element;
 }
 
 export function restartGui(scene: GameScene) {

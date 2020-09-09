@@ -11,18 +11,17 @@ font-family: "Helvetica Neue", "Microsoft Sans Serif", sans-serif;`
 
 export class GameUI extends GameCycleEntity {
     private readonly uiLayer: HTMLElement
+    private id: string;
 
-    constructor() {
+    constructor(sceneName: string) {
         super();
-        let layer = document.getElementById(ELEMENT_ID);
-        if (layer) {
-            this.uiLayer = layer;
-        } else {
-            this.uiLayer = document.createElement('div');
-            this.uiLayer.setAttribute('id', ELEMENT_ID);
-            this.uiLayer.style.cssText = DEFAULT_STYLE
-            document.body.prepend(this.uiLayer);
-        }
+
+        this.id = `${ELEMENT_ID}_${sceneName}`;
+
+        this.uiLayer = document.createElement('div');
+        this.uiLayer.setAttribute('id', this.id);
+        this.uiLayer.style.cssText = DEFAULT_STYLE
+        document.body.prepend(this.uiLayer);
     }
 
     getElement(selector: string) {
@@ -52,7 +51,7 @@ export class GameUI extends GameCycleEntity {
 
     destroy() {
         super.destroy();
-        document.removeChild(this.uiLayer);
+        document.body.removeChild(this.uiLayer);
         this.uiLayer.innerHTML = '';
     }
 }

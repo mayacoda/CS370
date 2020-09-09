@@ -24,17 +24,19 @@ import {
 export class GameScene extends GameCycleEntity {
     private objects: Set<GameObject>
     private scene: Scene
+    readonly name: string;
 
     private gui: GameUI;
 
     private skyboxMesh?: Mesh;
     private terrain?: Terrain;
 
-    constructor() {
+    constructor(sceneName: string) {
         super();
+        this.name = sceneName
         this.objects = new Set<GameObject>();
         this.scene = new Scene();
-        this.gui = new GameUI();
+        this.gui = new GameUI(sceneName);
     }
 
     getGUI() {
@@ -127,6 +129,8 @@ export class GameScene extends GameCycleEntity {
         if (this.terrain) {
             this.terrain.destroy();
         }
+
+        this.gui.destroy();
     }
 
     async loadTerrain(heightMap: string, texture: string, settings: TerrainSettings) {

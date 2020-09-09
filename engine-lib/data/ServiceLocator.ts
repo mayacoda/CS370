@@ -1,4 +1,8 @@
-type Service = 'camera' | 'renderer' | 'scene' | 'canvas' | 'physics';
+type Service = 'camera' | 'renderer' | 'scene' | 'canvas' | 'physics' | 'gameState';
+
+export interface GameState {
+    isPaused: boolean
+}
 
 export class ServiceLocator {
     private container: Map<Service, any> = new Map<Service, any>()
@@ -13,7 +17,7 @@ export class ServiceLocator {
 
     private static _instance: ServiceLocator;
 
-    static setService(serviceName: Service , service: any) {
+    static setService<T extends any>(serviceName: Service , service: T) {
         this.instance.container.set(serviceName, service);
     }
 

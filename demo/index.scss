@@ -27,6 +27,7 @@ body, html {
 .header {
   display: flex;
   padding: 20px;
+  height: 2em;
   width: 100%;
   flex-direction: row;
   justify-content: space-between;
@@ -40,6 +41,7 @@ body, html {
 .exclamation {
   font-family: $fancy-font-family;
   width: 100%;
+  flex-grow: 1;
   font-size: 3em;
   color: $fancy-font-color;
   text-align: center;
@@ -62,21 +64,32 @@ body, html {
   padding: 30px;
   border-radius: 10px;
   background: rgba(255, 205, 117, .5);
+}
 
+button {
+  font-family: $fancy-font-family;
+  font-size: 1.5rem;
+  border: none;
+  padding: 10px 14px;
+  background-color: $fancy-font-color;
+  color: #7d3a3a;
+  outline: none;
+  border-radius: 5px;
+
+  transition: background-color 100ms;
+
+  &:hover {
+    background-color: lighten($fancy-font-color, 10%);
+  }
+}
+
+.footer {
+  padding: 20px;
   button {
-    font-family: $fancy-font-family;
-    font-size: 1.5rem;
-    border: none;
-    padding: 10px 14px;
-    background-color: $fancy-font-color;
-    color: #7d3a3a;
-    outline: none;
-    border-radius: 5px;
-
-    transition: background-color 100ms;
-
+    opacity: 0.4;
+    margin-right: 10px;
     &:hover {
-      background-color: darken($fancy-font-color, 10%);
+      opacity: 1;
     }
   }
 }

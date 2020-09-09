@@ -3,7 +3,7 @@ import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass.js';
 import {ShaderPass} from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import {ServiceLocator} from "../ServiceLocator";
-import {Scene, Camera, WebGLRenderer, Vector2} from 'three';
+import {Scene, Camera, WebGLRenderer, Vector2, ShaderMaterial} from 'three';
 
 // language=GLSL
 const vertexShader = `

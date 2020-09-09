@@ -1,5 +1,5 @@
 import {Game} from "./Game";
-import {ServiceLocator} from "./ServiceLocator";
+import {GameState, ServiceLocator} from "./ServiceLocator";
 import {WebGLRenderer, Clock, PCFShadowMap, Camera, PerspectiveCamera} from "three";
 
 export class RenderEngine {
@@ -35,14 +35,22 @@ export class RenderEngine {
     update() {
         const step = () => {
             requestAnimationFrame(step);
+
+            const {isPaused} = ServiceLocator.getService<GameState>('gameState');
+
+            if (isPaused) return;
+
             const delta = this.clock.getDelta();
             this.game.update(delta);
 
             const currentGameScene = this.game.getCurrentScene();
-            const scene = currentGameScene.getScene();
+            const scene = currentGameScene?.getScene();
 
-            const camera = ServiceLocator.getService<Camera>('camera');
-            this.renderer.render(scene, camera);
+            if (scene) {
+                const camera = ServiceLocator.getService<Camera>('camera');
+                this.renderer.render(scene, camera);
+            }
+
         }
         step();
     }

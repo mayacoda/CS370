@@ -1,14 +1,14 @@
 import {GameScene} from "./GameScene";
 import {RenderEngine} from "./RenderEngine";
 import {GameCycleEntity} from "./GameCycleEntity";
-import {ServiceLocator} from "./ServiceLocator";
+import {GameState, ServiceLocator} from "./ServiceLocator";
 import {PhysicsEngine} from "./PhysicsEngine";
 import {Cache} from 'three';
 
 Cache.enabled = true;
 
 export class Game extends GameCycleEntity {
-    private currentScene = new GameScene();
+    private currentScene: GameScene | null = null;
     private scenes = new Map<string, GameScene>();
     private renderEngine: RenderEngine
     private physicsEngine: PhysicsEngine
@@ -23,10 +23,10 @@ export class Game extends GameCycleEntity {
         this.physicsEngine = new PhysicsEngine();
     }
 
-    addScene(sceneName: string, scene: GameScene) {
-        if (this.scenes.has(sceneName)) {
-            throw new Error(`scene ${sceneName} already exists in the game`)
-        }
+    addScene(scene: GameScene) {
+        const sceneName = scene.name;
+        if (!sceneName) throw new Error(`set name for scene being added with GameScene.setName`)
+        if (this.scenes.has(sceneName)) throw new Error(`scene ${sceneName} already exists in the game`)
 
         this.scenes.set(sceneName, scene)
     }
@@ -58,7 +58,7 @@ export class Game extends GameCycleEntity {
         }
     }
 
-    getCurrentScene(): GameScene {
+    getCurrentScene(): GameScene | null {
         return this.currentScene;
     }
 
@@ -68,18 +68,29 @@ export class Game extends GameCycleEntity {
 
     start() {
         super.start();
+        ServiceLocator.setService('gameState', {isPaused: false});
         this.renderEngine.start();
+    }
+
+    pause() {
+        const currentState = ServiceLocator.getService<GameState>('gameState');
+        ServiceLocator.setService('gameState', {...currentState, isPaused: true});
+    }
+
+    play() {
+        const currentState = ServiceLocator.getService<GameState>('gameState');
+        ServiceLocator.setService('gameState', {...currentState, isPaused: false});
     }
 
     update(time: number) {
         super.update(time);
-        this.currentScene.update(time);
+        this.currentScene?.update(time);
         this.physicsEngine.update(time);
     }
 
     destroy() {
         super.destroy();
-        this.currentScene.destroy();
+        this.currentScene?.destroy();
     }
 
     onLoadStart(callback: () => void) {
@@ -96,5 +107,13 @@ export class Game extends GameCycleEntity {
 
     endLoad() {
         this.loadEndCallback();
+    }
+
+    removeCurrentScene() {
+        if (this.currentScene) {
+            this.removeScene(this.currentScene.name);
+            this.currentScene.destroy();
+            this.currentScene = null;
+        }
     }
 }

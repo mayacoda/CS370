@@ -4,13 +4,15 @@ import {loadCamera} from "../common/camera";
 import {loadLights} from "./lights";
 import {loadObjects} from "../common/scene";
 import {initGamePlay, LEVEL_2_SCORE, LEVEL_2_TIME_LIMIT} from "./gameplay";
-import {restartGui, showInstructions} from "../common/gui";
+import {initGui, showInstructions} from "../common/gui";
+import {loadLevel1} from "../level1";
 
 export async function loadLevel2(game: Game) {
-    const scene = new GameScene();
-
     const SCENE_NAME = 'level 2'
-    game.addScene(SCENE_NAME, scene);
+
+    const scene = new GameScene(SCENE_NAME);
+
+    game.addScene(scene);
 
     await scene.loadSkybox([
         'skybox/green/px.png',
@@ -38,7 +40,17 @@ export async function loadLevel2(game: Game) {
     loadLights(scene);
     await loadObjects(scene);
 
-    restartGui(scene);
+    initGui(scene, {
+        pausePlayCallback: state => {
+            state ? game.pause() : game.play();
+        },
+        restartCallback: () => {
+            game.startLoad();
+            loadLevel1(game).then(() => {
+                game.endLoad();
+            })
+        }
+    });
 
     const text = [
         `

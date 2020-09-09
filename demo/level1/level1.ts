@@ -8,10 +8,10 @@ import {loadLevel2} from "../level2/level2";
 import {loadLights} from "./lights";
 
 export async function loadLevel1(game: Game) {
-    const scene = new GameScene();
-
     const SCENE_NAME = 'level 1';
-    game.addScene(SCENE_NAME, scene)
+    const scene = new GameScene(SCENE_NAME);
+
+    game.addScene(scene)
 
     await scene.loadSkybox([
         'skybox/sunset/px.png',
@@ -37,7 +37,19 @@ export async function loadLevel1(game: Game) {
 
     loadCamera(scene, character);
     loadLights(scene);
-    initGui(scene);
+
+    initGui(scene, {
+        pausePlayCallback: state => {
+            state ? game.pause() : game.play();
+        },
+        restartCallback: () => {
+            game.startLoad();
+            game.removeCurrentScene();
+            loadLevel1(game).then(() => {
+                game.endLoad();
+            })
+        }
+    });
 
     const text = [
         `
