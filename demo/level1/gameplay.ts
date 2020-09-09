@@ -4,17 +4,21 @@ import {getExclamationText, showExclamation, writeNewScore} from "../common/gui"
 
 export const LEVEL_1_SCORE = 10;
 let score = 0;
+let time = 0;
+let interval: number | undefined;
 const BALL_COLOR = '#c6c611';
 
-let winCallback = () => {};
+let winCallback = (time: number) => {};
 
-export function initGamePlay(scene: GameScene, character: GameObject, onWin: () => void) {
+export function initGamePlay(scene: GameScene, character: GameObject, onWin: (time: number) => void) {
     let {ball, hits} = launchBall(scene, character.position, BALL_COLOR)
     ball.setName('ball' + score);
 
     winCallback = onWin;
 
     attachListener(ball);
+
+    startTimer();
 
     function relaunchBall() {
         const data = launchBall(scene, character.position, BALL_COLOR);
@@ -55,6 +59,14 @@ function incrementScore(scene: GameScene) {
     writeNewScore(scene, score);
 
     if (score === LEVEL_1_SCORE) {
-        winCallback();
+        winCallback(time);
+
+        window.clearInterval(interval);
     }
+}
+
+function startTimer() {
+    interval = window.setInterval(() => {
+        time++;
+    }, 1000)
 }

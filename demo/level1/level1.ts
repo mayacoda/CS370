@@ -6,9 +6,11 @@ import {initGamePlay, LEVEL_1_SCORE} from "./gameplay";
 import {initGui, showInstructions} from "../common/gui";
 import {loadLevel2} from "../level2/level2";
 import {loadLights} from "./lights";
+import {updateHighScore} from "../common/high-score";
+import {LEVEL_1_SCENE_NAME} from "../common/levels";
 
 export async function loadLevel1(game: Game) {
-    const SCENE_NAME = 'level 1';
+    const SCENE_NAME = LEVEL_1_SCENE_NAME;
     const scene = new GameScene(SCENE_NAME);
 
     game.addScene(scene)
@@ -68,7 +70,9 @@ Rotate the camera with <strong>←</strong> and <strong>→</strong>
     ]
 
     showInstructions(scene, text, () => {
-        initGamePlay(scene, character, () => {
+        initGamePlay(scene, character, (time: number) => {
+            updateHighScore(SCENE_NAME, time);
+
             game.startLoad();
             loadLevel2(game).then(() => {
                 game.removeScene(SCENE_NAME);

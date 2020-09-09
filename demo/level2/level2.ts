@@ -6,9 +6,11 @@ import {loadObjects} from "../common/scene";
 import {initGamePlay, LEVEL_2_SCORE, LEVEL_2_TIME_LIMIT} from "./gameplay";
 import {initGui, showInstructions} from "../common/gui";
 import {loadLevel1} from "../level1";
+import {updateHighScore} from "../common/high-score";
+import {LEVEL_2_SCENE_NAME} from "../common/levels";
 
 export async function loadLevel2(game: Game) {
-    const SCENE_NAME = 'level 2'
+    const SCENE_NAME = LEVEL_2_SCENE_NAME
 
     const scene = new GameScene(SCENE_NAME);
 
@@ -64,7 +66,9 @@ export async function loadLevel2(game: Game) {
         `GO!`
     ]
     showInstructions(scene, text, () => {
-        initGamePlay(scene, character, () => {
+        initGamePlay(scene, character, (time: number) => {
+            updateHighScore(SCENE_NAME, time);
+
             showInstructions(scene, ['Nice job! Have yourself a bone'], () => {})
         }, () => {
             showInstructions(scene, ['Game over, you didn\'t make it'], () => {})

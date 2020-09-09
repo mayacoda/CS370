@@ -1,7 +1,7 @@
 import {GameScene} from "../../engine-lib/data";
 import {randomRangeInt} from "../../engine-lib/utilities";
 import {createElement} from "./gui-util";
-import {createMenuButton, createPausePlayButton, createRestartButton} from "./gui-footer";
+import {createHighScoreButton, createPausePlayButton, createRestartButton} from "./gui-footer";
 
 let timeout: number;
 
@@ -19,7 +19,7 @@ export function initGui(scene: GameScene,
     const {pausePlayCallback, restartCallback} = callbacks;
 
     const footer = createElement('footer');
-    footer.appendChild(createMenuButton())
+    footer.appendChild(createHighScoreButton(scene))
     footer.appendChild(createPausePlayButton(pausePlayCallback))
     footer.appendChild(createRestartButton(restartCallback))
 
@@ -28,7 +28,7 @@ export function initGui(scene: GameScene,
     gui.addElement(footer);
 }
 
-export function showInstructions(scene: GameScene, text: string[], onFinish: () => void) {
+export function showInstructions(scene: GameScene, text: string[], onFinish: () => void, buttonText: string = 'Woof! Woof! (Continue)') {
     if (text.length === 0) {
         onFinish();
         return;
@@ -50,7 +50,7 @@ export function showInstructions(scene: GameScene, text: string[], onFinish: () 
     instructionsText.innerHTML = text[0]
 
     let page = 0;
-    continueButton.textContent = 'Woof! Woof! (Continue)';
+    continueButton.textContent = buttonText;
     continueButton.addEventListener('click', () => {
         page++;
         if (page >= text.length) {

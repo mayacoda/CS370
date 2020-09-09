@@ -1,8 +1,17 @@
 import {createElement} from "./gui-util";
+import {GameScene} from "../../engine-lib/data";
+import {showInstructions} from "./gui";
+import {ServiceLocator} from "../../engine-lib/data/ServiceLocator";
+import {GameStorage} from "../../engine-lib/data/GameStorage";
+import {LEVEL_1_SCENE_NAME, LEVEL_2_SCENE_NAME} from "./levels";
+import {formatTime} from "./high-score";
 
-export function createMenuButton() {
-    const element = createElement('menu-button');
-    element.addEventListener('click', () => console.log('opening the menu'))
+export function createHighScoreButton(scene: GameScene) {
+    const element = createElement('high-score', 'button');
+    element.innerHTML = 'hi score'
+    element.addEventListener('click', () => {
+        showHighScore(scene);
+    })
     return element;
 }
 
@@ -25,4 +34,22 @@ export function createRestartButton(restartCallback: () => void) {
        restartCallback();
     });
     return element;
+}
+
+
+export function showHighScore(scene: GameScene) {
+    const storage = ServiceLocator.getService<GameStorage>('storage');
+
+    const level1Item = storage.getItem(LEVEL_1_SCENE_NAME)
+    const level1Score = level1Item ? formatTime(parseInt(level1Item)) : 'No Score'
+    const level2Item = storage.getItem(LEVEL_2_SCENE_NAME)
+    const level2Score = level2Item ? formatTime(parseInt(level2Item)) : 'No Score'
+
+    const text = [
+        `<h1>High Score</h1>
+        <p>${LEVEL_1_SCENE_NAME}: ${level1Score}</p>
+        <p>${LEVEL_2_SCENE_NAME}: ${level2Score}</p>`
+    ]
+
+    showInstructions(scene, text, () => {}, 'Close');
 }

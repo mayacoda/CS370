@@ -2,6 +2,7 @@ import {GameObject, GameScene} from "../../engine-lib/data";
 import {hideBall, launchBall, removeBall} from "../common/ball";
 import {getExclamationText, showExclamation, writeNewScore} from "../common/gui";
 import {randomRange} from "../../engine-lib/utilities";
+import {formatTime} from "../common/high-score";
 
 let score = 0;
 let time = 0;
@@ -10,7 +11,7 @@ let interval: number | undefined;
 export const LEVEL_2_SCORE = 20;
 export const LEVEL_2_TIME_LIMIT = 3;
 
-let winCallback = () => {
+let winCallback = (time: number) => {
 };
 
 let loseCallback = () => {
@@ -19,7 +20,10 @@ let loseCallback = () => {
 const BALL1_COLOR = '#9bff5e';
 const BALL2_COLOR = '#0065ff'
 
-export function initGamePlay(scene: GameScene, character: GameObject, onWin: () => void, onLose: () => void) {
+export function initGamePlay(scene: GameScene,
+                             character: GameObject,
+                             onWin: (time: number) => void,
+                             onLose: () => void) {
     let data1 = launchBall(scene, character.position, BALL1_COLOR);
     data1.ball.setName('ball1');
     let data2 = launchBall(scene, character.position, BALL2_COLOR);
@@ -71,7 +75,7 @@ function incrementScore(scene: GameScene) {
     writeNewScore(scene, score);
 
     if (score === LEVEL_2_SCORE) {
-        winCallback();
+        winCallback(time);
     }
 }
 
@@ -88,11 +92,4 @@ function incrementTime(scene: GameScene) {
         window.clearInterval(interval);
         loseCallback();
     }
-}
-
-function formatTime(time: number) {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-
-    return minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0')
 }

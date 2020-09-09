@@ -4,6 +4,7 @@ import {GameCycleEntity} from "./GameCycleEntity";
 import {GameState, ServiceLocator} from "./ServiceLocator";
 import {PhysicsEngine} from "./PhysicsEngine";
 import {Cache} from 'three';
+import {GameStorage} from "./GameStorage";
 
 Cache.enabled = true;
 
@@ -12,6 +13,7 @@ export class Game extends GameCycleEntity {
     private scenes = new Map<string, GameScene>();
     private renderEngine: RenderEngine
     private physicsEngine: PhysicsEngine
+    private storage: GameStorage;
 
     private loadStartCallback = () => {}
     private loadEndCallback = () => {}
@@ -21,6 +23,7 @@ export class Game extends GameCycleEntity {
         ServiceLocator.setService('canvas', canvas);
         this.renderEngine = new RenderEngine(canvas, this);
         this.physicsEngine = new PhysicsEngine();
+        this.storage = new GameStorage();
     }
 
     addScene(scene: GameScene) {
@@ -114,6 +117,7 @@ export class Game extends GameCycleEntity {
             this.removeScene(this.currentScene.name);
             this.currentScene.destroy();
             this.currentScene = null;
+            ServiceLocator.setService('scene', null)
         }
     }
 }
