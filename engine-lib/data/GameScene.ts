@@ -20,6 +20,8 @@ import {
     Color,
     FogExp2
 } from "three";
+import {GameCamera} from "./GameCamera";
+import {AudioEngine} from "./AudioEngine";
 
 export class GameScene extends GameCycleEntity {
     private objects: Set<GameObject>
@@ -30,6 +32,7 @@ export class GameScene extends GameCycleEntity {
 
     private skyboxMesh?: Mesh;
     private terrain?: Terrain;
+    private camera?: GameCamera;
 
     constructor(sceneName: string) {
         super();
@@ -45,6 +48,10 @@ export class GameScene extends GameCycleEntity {
 
     getScene() {
         return this.scene;
+    }
+
+    addCamera(camera: GameCamera) {
+        this.camera = camera;
     }
 
     addObject(object: GameObject) {
@@ -103,6 +110,8 @@ export class GameScene extends GameCycleEntity {
             this.terrain.start();
         }
 
+        if (this.camera) this.camera.start();
+
         for (const object of this.objects) {
             object.start();
         }
@@ -117,6 +126,8 @@ export class GameScene extends GameCycleEntity {
         for (const object of this.objects) {
             object.update(time);
         }
+
+        if (this.camera) this.camera.update(time);
     }
 
     destroy() {
@@ -129,6 +140,8 @@ export class GameScene extends GameCycleEntity {
         if (this.terrain) {
             this.terrain.destroy();
         }
+
+        if (this.camera) this.camera.destroy();
 
         this.gui.destroy();
     }
@@ -175,5 +188,9 @@ export class GameScene extends GameCycleEntity {
 
     getTerrainNormalAtPoint(x: number, z: number): Vector3 | null {
         return this.terrain ? this.terrain.getNormalAtPoint(x, z) : null
+    }
+
+    getAudio() {
+        return ServiceLocator.getService<AudioEngine>('audio');
     }
 }

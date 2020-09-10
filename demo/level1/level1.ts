@@ -47,11 +47,19 @@ export async function loadLevel1(game: Game) {
         restartCallback: () => {
             game.startLoad();
             game.removeCurrentScene();
+            music.stop();
             loadLevel1(game).then(() => {
                 game.endLoad();
             })
         }
     });
+
+    const audio = game.getAudio();
+
+    const music  = await audio.loadSound('audio/Bohemian Beach - Chris Haugen.mp3', 'level_1_music');
+    music.setLoop(true);
+    music.setVolume(0.3);
+    music.play();
 
     const text = [
         `
@@ -71,15 +79,19 @@ Rotate the camera with <strong>←</strong> and <strong>→</strong>
 
     showInstructions(scene, text, () => {
         initGamePlay(scene, character, (time: number) => {
+            music.stop();
+
             updateHighScore(SCENE_NAME, time);
 
             game.startLoad();
             loadLevel2(game).then(() => {
+
                 game.removeScene(SCENE_NAME);
                 game.endLoad();
             });
         });
     });
+
 
     game.loadScene(SCENE_NAME);
 }

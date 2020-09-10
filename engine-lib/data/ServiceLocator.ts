@@ -1,4 +1,4 @@
-type Service = 'camera' | 'renderer' | 'scene' | 'canvas' | 'physics' | 'gameState' | 'storage';
+type Service = 'camera' | 'renderer' | 'scene' | 'canvas' | 'physics' | 'gameState' | 'storage' | 'audio';
 
 export interface GameState {
     isPaused: boolean

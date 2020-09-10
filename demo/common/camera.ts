@@ -22,5 +22,5 @@ export function loadCamera(scene: GameScene, character: GameObject) {
         }
     })
 
-    scene.addObject(camera);
+    scene.addCamera(camera);
 }

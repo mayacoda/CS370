@@ -10,8 +10,8 @@ const BALL_COLOR = '#c6c611';
 
 let winCallback = (time: number) => {};
 
-export function initGamePlay(scene: GameScene, character: GameObject, onWin: (time: number) => void) {
-    let {ball, hits} = launchBall(scene, character.position, BALL_COLOR)
+export async function initGamePlay(scene: GameScene, character: GameObject, onWin: (time: number) => void) {
+    let {ball, hits} = await launchBall(scene, character.position, BALL_COLOR)
     ball.setName('ball' + score);
 
     winCallback = onWin;
@@ -20,8 +20,8 @@ export function initGamePlay(scene: GameScene, character: GameObject, onWin: (ti
 
     startTimer();
 
-    function relaunchBall() {
-        const data = launchBall(scene, character.position, BALL_COLOR);
+    async function relaunchBall() {
+        const data = await launchBall(scene, character.position, BALL_COLOR);
         ball = data.ball;
         hits = data.hits;
 

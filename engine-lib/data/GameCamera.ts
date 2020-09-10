@@ -1,6 +1,7 @@
 import {GameObject} from "./GameObject";
 import {Camera, Vector3, PerspectiveCamera, OrthographicCamera} from "three";
 import {ServiceLocator} from "./ServiceLocator";
+import {AudioEngine} from "./AudioEngine";
 
 export class GameCamera extends GameObject {
     camera: Camera;
@@ -33,6 +34,8 @@ export class GameCamera extends GameObject {
         }
 
         ServiceLocator.setService('camera', this.camera);
+
+        this.camera.add(ServiceLocator.getService<AudioEngine>('audio').getListener());
     }
 
     lookAt(target: GameObject) {

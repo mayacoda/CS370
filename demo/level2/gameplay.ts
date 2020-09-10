@@ -20,13 +20,13 @@ let loseCallback = () => {
 const BALL1_COLOR = '#9bff5e';
 const BALL2_COLOR = '#0065ff'
 
-export function initGamePlay(scene: GameScene,
+export async function initGamePlay(scene: GameScene,
                              character: GameObject,
                              onWin: (time: number) => void,
                              onLose: () => void) {
-    let data1 = launchBall(scene, character.position, BALL1_COLOR);
+    let data1 = await launchBall(scene, character.position, BALL1_COLOR);
     data1.ball.setName('ball1');
-    let data2 = launchBall(scene, character.position, BALL2_COLOR);
+    let data2 = await launchBall(scene, character.position, BALL2_COLOR);
     data2.ball.setName('ball2');
 
     winCallback = onWin;
@@ -37,8 +37,8 @@ export function initGamePlay(scene: GameScene,
     attachListener(data1);
     attachListener(data2);
 
-    function relaunchBall() {
-        const data = launchBall(scene, character.position, [BALL1_COLOR, BALL2_COLOR][Math.round(randomRange(0, 1))]);
+    async function relaunchBall() {
+        const data = await launchBall(scene, character.position, [BALL1_COLOR, BALL2_COLOR][Math.round(randomRange(0, 1))]);
 
         data.ball.setName('ball' + score);
 

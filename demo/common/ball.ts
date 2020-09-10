@@ -7,7 +7,8 @@ import {
     DoubleSide,
     Mesh,
     Material,
-    MeshPhongMaterial
+    MeshPhongMaterial,
+    PositionalAudio
 } from 'three';
 import Ammo from "ammojs-typed";
 import {ServiceLocator} from "../../engine-lib/data/ServiceLocator";
@@ -16,7 +17,7 @@ import {Terrain} from "../../engine-lib/data/Terrain";
 import {randomRange} from "../../engine-lib/utilities";
 import {CollisionData} from "../../engine-lib/data/interfaces/physics-interfaces";
 
-export function launchBall(scene: GameScene, position: Vector3, color: string) {
+export async function launchBall(scene: GameScene, position: Vector3, color: string) {
     const radius = 0.15;
     const ball = new GameObject();
 
@@ -27,6 +28,10 @@ export function launchBall(scene: GameScene, position: Vector3, color: string) {
     ball.translate(position.x, position.y + 5, position.z);
 
     ball.tag = 'ball'
+
+    const audio = scene.getAudio();
+    const sound = await audio.loadPositionalSound('audio/hit.wav', 'impact_sound', ball)
+    sound.setVolume(5);
 
     ball.onStart(() => {
         ball.createRigidBody({
@@ -54,7 +59,18 @@ export function launchBall(scene: GameScene, position: Vector3, color: string) {
             return collision.isOfTags('ball', 'terrain') && collision.involvesName(ball.getName());
         })
 
-        if (collision) markCollision(scene, collision, hits, color)
+        if (collision) {
+            markCollision(scene, collision, hits, color)
+            let audio = ball.object3D.children[0] as PositionalAudio;
+            const linearVelocity = ball.rigidBody?.getLinearVelocity();
+            const speed = linearVelocity ? linearVelocity.length() : 0;
+            if (!audio || speed < 0.2) return;
+
+            if (audio.isPlaying) {
+                audio.stop();
+            }
+            audio.play();
+        }
     })
 
     ball.castShadow(true);

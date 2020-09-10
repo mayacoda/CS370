@@ -48,11 +48,22 @@ export async function loadLevel2(game: Game) {
         },
         restartCallback: () => {
             game.startLoad();
+            music.stop();
             loadLevel1(game).then(() => {
                 game.endLoad();
             })
         }
     });
+
+    const audio = game.getAudio();
+
+    const music = await audio.loadSound(
+        'audio/Vacation Casual - Sir Cubworth.mp3',
+        'level_2_music'
+    );
+    music.setLoop(true);
+    music.setVolume(0.3);
+    music.play();
 
     const text = [
         `

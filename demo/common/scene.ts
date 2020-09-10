@@ -30,6 +30,16 @@ export async function loadObjects(scene: GameScene) {
 
         const tree = await createTree();
 
+        if (i % 3 === 0) {
+            const sound = await scene.getAudio().loadPositionalSound('audio/birds-chirping.wav', `birds-chirping${i}`, tree);
+            sound.setLoop(true);
+            sound.setVolume(3);
+
+            tree.onStart(() => {
+                sound.play();
+            });
+        }
+
         tree.castShadow()
         let x = randomRange(-45, 45);
         let z = randomRange(-45, 45);

@@ -5,6 +5,7 @@ import {GameState, ServiceLocator} from "./ServiceLocator";
 import {PhysicsEngine} from "./PhysicsEngine";
 import {Cache} from 'three';
 import {GameStorage} from "./GameStorage";
+import {AudioEngine} from "./AudioEngine";
 
 Cache.enabled = true;
 
@@ -14,6 +15,7 @@ export class Game extends GameCycleEntity {
     private renderEngine: RenderEngine
     private physicsEngine: PhysicsEngine
     private storage: GameStorage;
+    private audio: AudioEngine;
 
     private loadStartCallback = () => {}
     private loadEndCallback = () => {}
@@ -24,6 +26,7 @@ export class Game extends GameCycleEntity {
         this.renderEngine = new RenderEngine(canvas, this);
         this.physicsEngine = new PhysicsEngine();
         this.storage = new GameStorage();
+        this.audio = new AudioEngine();
     }
 
     addScene(scene: GameScene) {
@@ -78,11 +81,13 @@ export class Game extends GameCycleEntity {
     pause() {
         const currentState = ServiceLocator.getService<GameState>('gameState');
         ServiceLocator.setService('gameState', {...currentState, isPaused: true});
+        this.audio.pauseAll();
     }
 
     play() {
         const currentState = ServiceLocator.getService<GameState>('gameState');
         ServiceLocator.setService('gameState', {...currentState, isPaused: false});
+        this.audio.playPaused();
     }
 
     update(time: number) {
@@ -119,5 +124,9 @@ export class Game extends GameCycleEntity {
             this.currentScene = null;
             ServiceLocator.setService('scene', null)
         }
+    }
+
+    getAudio() {
+        return this.audio;
     }
 }
