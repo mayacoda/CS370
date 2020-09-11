@@ -58,6 +58,10 @@ export async function loadObjects(scene: GameScene) {
         scene.addObject(tree)
     }
 
+    const tree = await createTree();
+    tree.translate(scene.convertWorldPointToTerrainPoint(47, 50))
+    scene.addObject(tree);
+
     await loadLampPosts(scene);
 }
 

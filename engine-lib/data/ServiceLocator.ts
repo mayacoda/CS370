@@ -2,6 +2,7 @@ type Service = 'camera' | 'renderer' | 'scene' | 'canvas' | 'physics' | 'gameSta
 
 export interface GameState {
     isPaused: boolean
+    debug: boolean
 }
 
 export class ServiceLocator {

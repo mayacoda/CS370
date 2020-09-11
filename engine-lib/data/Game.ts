@@ -90,6 +90,16 @@ export class Game extends GameCycleEntity {
         this.audio.playPaused();
     }
 
+    debug(bool: boolean) {
+        const currentState = ServiceLocator.getService<GameState>('gameState');
+        ServiceLocator.setService('gameState', {...currentState, debug: bool});
+    }
+
+    isDebug() {
+        const {debug} = ServiceLocator.getService<GameState>('gameState');
+        return debug;
+    }
+
     update(time: number) {
         super.update(time);
         this.currentScene?.update(time);

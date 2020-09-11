@@ -4,7 +4,7 @@ import {GameScene} from "./GameScene";
 import {TextureLoader} from "./TextureLoader";
 import Ammo from "ammojs-typed";
 import {PhysicsEngine} from "./PhysicsEngine";
-import {ServiceLocator} from "./ServiceLocator";
+import {GameState, ServiceLocator} from "./ServiceLocator";
 import {RigidBodySettings} from "./interfaces/physics-interfaces";
 import {
     Vector3,
@@ -14,7 +14,10 @@ import {
     Geometry,
     MeshPhongMaterial,
     Color,
-    DoubleSide
+    Quaternion,
+    DoubleSide,
+    CylinderGeometry,
+    SphereGeometry
 } from "three";
 
 export class GameObject extends GameCycleEntity {
@@ -25,6 +28,9 @@ export class GameObject extends GameCycleEntity {
     protected scene: GameScene | null = null;
 
     protected rb?: Ammo.btRigidBody;
+    public ghostObject?: Ammo.btGhostObject;
+
+    rigidBodyMesh?: Mesh;
 
     constructor() {
         super();
@@ -43,6 +49,29 @@ export class GameObject extends GameCycleEntity {
     update(time?: number) {
         this.children.forEach(child => child.update(time))
         super.update();
+
+        if (this.rigidBodyMesh) {
+            this.updateRigidBodyHelper(this.rigidBodyMesh);
+        }
+    }
+
+    private updateRigidBodyHelper(mesh: Mesh) {
+        let worldTransform: Ammo.btTransform | undefined = undefined;
+
+        if (this.ghostObject) {
+            worldTransform = this.ghostObject.getWorldTransform();
+        }
+
+        if (this.rb) {
+            const tempTransform = new Ammo.btTransform();
+            this.rb.getMotionState().getWorldTransform(tempTransform);
+            worldTransform = tempTransform;
+        }
+
+        if (worldTransform !== undefined) {
+            const origin = worldTransform.getOrigin();
+            mesh.position.set(origin.x(), origin.y(), origin.z());
+        }
     }
 
     destroy() {
@@ -57,6 +86,11 @@ export class GameObject extends GameCycleEntity {
         if (this.object3D instanceof Mesh) {
             this.object3D.geometry.dispose();
             (this.object3D.material as Material).dispose();
+        }
+
+        if (this.rigidBodyMesh) {
+            this.rigidBodyMesh.geometry.dispose();
+            (this.rigidBodyMesh.material as Material).dispose();
         }
 
         super.destroy();
@@ -181,6 +215,40 @@ export class GameObject extends GameCycleEntity {
         this.object3D.translateX(vec3.x)
         this.object3D.translateY(vec3.y)
         this.object3D.translateZ(vec3.z)
+
+        this.translateKinematicCollider();
+    }
+
+    private translateKinematicCollider() {
+        if (this.rb || this.ghostObject) {
+            const threePos = new Vector3();
+            const threeQuat = new Quaternion();
+
+            threePos.copy(this.object3D.position);
+            threeQuat.copy(this.object3D.quaternion);
+
+            const ammoPos = new Ammo.btVector3();
+            const ammoQuat = new Ammo.btQuaternion(0, 0, 0, 0);
+            const transform = new Ammo.btTransform();
+
+            ammoPos.setValue(threePos.x, threePos.y, threePos.z);
+            ammoQuat.setValue(threeQuat.x, threeQuat.y, threeQuat.z, threeQuat.w);
+
+            transform.setIdentity();
+            transform.setOrigin(ammoPos);
+            transform.setRotation(ammoQuat);
+
+            if (this.rb) {
+                const ms = this.rb.getMotionState();
+                if (ms) {
+                    ms.setWorldTransform(transform);
+                }
+            }
+
+            if (this.ghostObject) {
+                this.ghostObject.setWorldTransform(transform);
+            }
+        }
     }
 
     get position() {
@@ -218,6 +286,49 @@ export class GameObject extends GameCycleEntity {
     createRigidBody(settings: RigidBodySettings) {
         const physics = ServiceLocator.getService<PhysicsEngine>('physics');
         this.rb = physics.createRigidBody({...settings, object: this});
+        const transform = new Ammo.btTransform();
+        this.rb.getMotionState().getWorldTransform(transform);
+        this.createCollisionShapeHelper(settings, transform, '#e3b3b3');
+    }
+
+    createGhostObject(settings: RigidBodySettings) {
+        const physics = ServiceLocator.getService<PhysicsEngine>('physics');
+        this.ghostObject = physics.createGhostObject({...settings, object: this});
+        this.createCollisionShapeHelper(settings, this.ghostObject.getWorldTransform(), '#ffc700');
+    }
+
+    createCollisionShapeHelper(settings: RigidBodySettings, worldTransform: Ammo.btTransform, color: string) {
+        const {debug} = ServiceLocator.getService<GameState>('gameState');
+        if (!debug) return;
+
+        if (settings.type === 'sphere') {
+            this.rigidBodyMesh = new Mesh(new SphereGeometry(
+                settings.radius,
+                10,
+                10
+            ), new MeshPhongMaterial({color, opacity: 0.5, transparent: true, side: DoubleSide}))
+        }
+
+        if (settings.type === 'cylinder') {
+            this.rigidBodyMesh = new Mesh(new CylinderGeometry(
+                settings.radius,
+                settings.radius,
+                settings.height,
+                10,
+                10
+            ), new MeshPhongMaterial({color, opacity: 0.5, transparent: true, side: DoubleSide}))
+        }
+
+        if (this.rigidBodyMesh) {
+            this.rigidBodyMesh.name = (settings.object?.getName() || '') + ' Collision Shape'
+
+            const origin = worldTransform.getOrigin();
+            this.rigidBodyMesh.position.set(origin.x(), origin.y(), origin.z());
+            const scene = this.scene?.getScene();
+            if (scene) {
+                scene.add(this.rigidBodyMesh);
+            }
+        }
     }
 
     getName() {

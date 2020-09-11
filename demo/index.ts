@@ -8,6 +8,8 @@ async function init() {
 
     // start the game
     const game = new Game(canvas);
+    game.debug(false);
+
     game.startLoad();
     await game.preload()
 

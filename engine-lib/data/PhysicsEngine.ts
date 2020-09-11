@@ -5,9 +5,21 @@ import {GameObject} from "./GameObject";
 import {CollisionData, RigidBodySettings} from "./interfaces/physics-interfaces";
 import {GameCycleEntity} from "./GameCycleEntity";
 
-export type ColliderType = 'box' | 'cylinder' | 'cone' | 'sphere'
 
 const STATE = {DISABLE_DEACTIVATION: 4}
+const FLAGS = {
+    CF_STATIC_OBJECT: 1,
+    CF_KINEMATIC_OBJECT: 2,
+    CF_NO_CONTACT_RESPONSE: 4,
+    CF_CUSTOM_MATERIAL_CALLBACK: 8,
+    CF_CHARACTER_OBJECT: 16,
+    CF_DISABLE_VISUALIZE_OBJECT: 32,
+    CF_DISABLE_SPU_COLLISION_PROCESSING: 64,
+    CF_HAS_CONTACT_STIFFNESS_DAMPING: 128,
+    CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR: 256,
+    CF_HAS_FRICTION_ANCHOR: 512,
+    CF_HAS_COLLISION_SOUND_TRIGGER: 1024
+}
 
 export class PhysicsEngine extends GameCycleEntity {
     private physicsWorld?: Ammo.btDiscreteDynamicsWorld;
@@ -24,7 +36,12 @@ export class PhysicsEngine extends GameCycleEntity {
         const broadphase = new Ammo.btDbvtBroadphase();
         const solver = new Ammo.btSequentialImpulseConstraintSolver();
 
-        this.physicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+        this.physicsWorld = new Ammo.btDiscreteDynamicsWorld(
+            dispatcher,
+            broadphase,
+            solver,
+            collisionConfiguration
+        );
         this.physicsWorld.setGravity(new Ammo.btVector3(0, -9.82, 0));
 
         ServiceLocator.setService('physics', this);
@@ -46,11 +63,18 @@ export class PhysicsEngine extends GameCycleEntity {
         const groundMass = 0;
         const groundLocalInertia = new Ammo.btVector3();
         const groundMotionState = new Ammo.btDefaultMotionState(terrainTransform);
-        const groundBody = new Ammo.btRigidBody(new Ammo.btRigidBodyConstructionInfo(groundMass, groundMotionState, terrainShape, groundLocalInertia))
+        const groundBody = new Ammo.btRigidBody(new Ammo.btRigidBodyConstructionInfo(
+            groundMass,
+            groundMotionState,
+            terrainShape,
+            groundLocalInertia
+        ))
 
         groundBody.setRestitution(0.3);
         groundBody.setFriction(4);
         groundBody.setRollingFriction(10);
+
+        groundBody.setCollisionFlags(FLAGS.CF_STATIC_OBJECT);
 
         // @ts-ignore
         groundBody.object = terrain;
@@ -70,6 +94,91 @@ export class PhysicsEngine extends GameCycleEntity {
         if (!this.physicsWorld) throw new Error('PhysicsEngine.init not called or finished yet');
         if (!settings.object) throw new Error('Specify GameObject to add rigid body to');
 
+        let collider = this.createColliderShape(settings);
+
+        if (settings.type !== 'sphere' && settings.margin === undefined) collider.setMargin(0.05);
+        if (settings.margin !== undefined) collider.setMargin(settings.margin);
+
+        const localInertia = new Ammo.btVector3(0, 0, 0);
+        collider.calculateLocalInertia(settings.mass, localInertia);
+        const transform = new Ammo.btTransform();
+        transform.setIdentity();
+        const pos = settings.object.position;
+        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+        const motionState = new Ammo.btDefaultMotionState(transform);
+        const rbInfo = new Ammo.btRigidBodyConstructionInfo(
+            settings.mass,
+            motionState,
+            collider,
+            localInertia
+        );
+        const body = new Ammo.btRigidBody(rbInfo);
+
+        // @ts-ignorew
+        body.object = settings.object;
+
+        if (settings.mass > 0) {
+            this.dynamicObjects.add(settings.object);
+        }
+
+        if (settings.rollingFriction !== undefined) body.setRollingFriction(settings.rollingFriction);
+        if (settings.restitution !== undefined) body.setRestitution(settings.restitution);
+        if (settings.friction !== undefined) body.setFriction(settings.friction);
+        if (settings.isDynamic) body.setActivationState(STATE.DISABLE_DEACTIVATION);
+        if (settings.isKinematic !== undefined) {
+            const flags = settings.isKinematic ? body.getCollisionFlags() | FLAGS.CF_KINEMATIC_OBJECT : body.getCollisionFlags() & ~FLAGS.CF_KINEMATIC_OBJECT;
+            body.setCollisionFlags(flags);
+        }
+        if (settings.isStatic !== undefined) {
+            const flags = settings.isStatic ? body.getCollisionFlags() | FLAGS.CF_STATIC_OBJECT : body.getCollisionFlags() & ~FLAGS.CF_STATIC_OBJECT;
+            body.setCollisionFlags(flags);
+        }
+        if (settings.noContactResponse !== undefined) {
+            const flags = settings.noContactResponse ? body.getCollisionFlags() | FLAGS.CF_NO_CONTACT_RESPONSE : body.getCollisionFlags() & ~FLAGS.CF_NO_CONTACT_RESPONSE;
+            body.setCollisionFlags(flags);
+        }
+        if (settings.isCharacter !== undefined) {
+            const flags = settings.isCharacter ? body.getCollisionFlags() | FLAGS.CF_CHARACTER_OBJECT : body.getCollisionFlags() & ~FLAGS.CF_CHARACTER_OBJECT;
+            body.setCollisionFlags(flags);
+        }
+
+        if (settings.group !== undefined && settings.mask !== undefined) {
+            this.physicsWorld.addRigidBody(body, settings.group, settings.mask);
+        } else {
+            this.physicsWorld.addRigidBody(body);
+        }
+
+        return body;
+    }
+
+    public createGhostObject(settings: RigidBodySettings) {
+        if (!this.physicsWorld) throw new Error('PhysicsEngine.init not called or finished yet');
+        if (!settings.object) throw new Error('Specify GameObject to add rigid body to');
+
+        let collider = this.createColliderShape(settings);
+
+        const transform = new Ammo.btTransform();
+        transform.setIdentity();
+        const pos = settings.object.position;
+        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+
+        const ghostObject = new Ammo.btGhostObject();
+        ghostObject.setWorldTransform(transform);
+        ghostObject.setCollisionShape(collider);
+        if (settings.isDynamic) ghostObject.setActivationState(STATE.DISABLE_DEACTIVATION);
+        if (settings.isKinematic) ghostObject.setCollisionFlags(FLAGS.CF_KINEMATIC_OBJECT);
+        if (settings.noContactResponse) ghostObject.setCollisionFlags(FLAGS.CF_NO_CONTACT_RESPONSE);
+        if (settings.isCharacter) ghostObject.setCollisionFlags(FLAGS.CF_CHARACTER_OBJECT);
+
+        this.physicsWorld.addCollisionObject(ghostObject);
+
+        // @ts-ignore
+        ghostObject.object = settings.object;
+
+        return ghostObject;
+    }
+
+    private createColliderShape(settings: RigidBodySettings) {
         let collider: Ammo.btCollisionShape;
 
         switch (settings.type) {
@@ -80,7 +189,11 @@ export class PhysicsEngine extends GameCycleEntity {
             }
             case "cylinder": {
                 const {radius, height} = settings;
-                collider = new Ammo.btCylinderShape(new Ammo.btVector3(radius, height * 0.5, radius));
+                collider = new Ammo.btCylinderShape(new Ammo.btVector3(
+                    radius,
+                    height * 0.5,
+                    radius
+                ));
                 break;
             }
             case "cone": {
@@ -93,38 +206,14 @@ export class PhysicsEngine extends GameCycleEntity {
                 collider = new Ammo.btSphereShape(radius);
                 break;
             }
+            case "capsule": {
+                const {radius, height} = settings;
+                collider = new Ammo.btCapsuleShape(radius, height);
+                break;
+            }
         }
 
-        if (settings.type !== 'sphere' && settings.margin === undefined) collider.setMargin(0.05);
-        if (settings.margin !== undefined) collider.setMargin(settings.margin);
-
-        const localInertia = new Ammo.btVector3(0, 0, 0);
-        collider.calculateLocalInertia(settings.mass, localInertia);
-        const transform = new Ammo.btTransform();
-        transform.setIdentity();
-        const pos = settings.object.position;
-        transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
-        const motionState = new Ammo.btDefaultMotionState(transform);
-        const rbInfo = new Ammo.btRigidBodyConstructionInfo(settings.mass, motionState, collider, localInertia);
-        const body = new Ammo.btRigidBody(rbInfo);
-
-        // @ts-ignore
-        body.object = settings.object;
-
-        this.dynamicObjects.add(settings.object);
-
-        if (settings.group !== undefined && settings.mask !== undefined) {
-            this.physicsWorld.addRigidBody(body, settings.group, settings.mask);
-        } else {
-            this.physicsWorld.addRigidBody(body);
-        }
-
-        if (settings.rollingFriction !== undefined) body.setRollingFriction(settings.rollingFriction);
-        if (settings.restitution !== undefined) body.setRestitution(settings.restitution);
-        if (settings.friction !== undefined) body.setFriction(settings.friction);
-        if (settings.isDynamic) body.setActivationState(STATE.DISABLE_DEACTIVATION)
-
-        return body;
+        return collider;
     }
 
     private detectCollisions() {
@@ -153,8 +242,6 @@ export class PhysicsEngine extends GameCycleEntity {
                 // @ts-ignore
                 const gameObject1 = rb1.object as GameObject;
 
-                const velocity0 = rb0.getLinearVelocity();
-                const velocity1 = rb1.getLinearVelocity();
                 const worldPos0 = contactPoint.get_m_positionWorldOnA();
                 const worldPos1 = contactPoint.get_m_positionWorldOnB();
                 const localPos0 = contactPoint.get_m_localPointA();
@@ -163,24 +250,22 @@ export class PhysicsEngine extends GameCycleEntity {
                 this.collisions.add({
                     object0: {
                         object: gameObject0,
-                        velocity: velocity0,
                         worldPosition: worldPos0,
                         localPosition: localPos0
                     },
                     object1: {
                         object: gameObject1,
-                        velocity: velocity1,
                         worldPosition: worldPos1,
                         localPosition: localPos1
                     },
                     isOfTags: (tag0, tag1) => {
-                        const gameObjectTag0 = gameObject0.tag;
-                        const gameObjectTag1 = gameObject1.tag;
+                        const gameObjectTag0 = gameObject0?.tag;
+                        const gameObjectTag1 = gameObject1?.tag;
                         return (gameObjectTag0 === tag0 && gameObjectTag1 === tag1) || (gameObjectTag0 === tag1 && gameObjectTag1 === tag0)
                     },
                     involvesName: (name: string) => {
-                        const gameObjectName0 = gameObject0.getName();
-                        const gameObjectName1 = gameObject1.getName();
+                        const gameObjectName0 = gameObject0?.getName();
+                        const gameObjectName1 = gameObject1?.getName();
                         return gameObjectName0 === name || gameObjectName1 === name;
                     }
                 })
@@ -197,7 +282,7 @@ export class PhysicsEngine extends GameCycleEntity {
         super.update(time);
         if (!this.physicsWorld) throw new Error('PhysicsEngine.init not called or finished yet');
 
-        this.physicsWorld.stepSimulation(time * 100 );
+        this.physicsWorld.stepSimulation(time * 100);
 
         this.dynamicObjects.forEach(object => {
             if (!this.tmpTransform) this.tmpTransform = new Ammo.btTransform();

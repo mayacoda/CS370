@@ -1,6 +1,7 @@
 import {GameObject} from "../GameObject";
-import {ColliderType} from "../PhysicsEngine";
 import Ammo from "ammojs-typed";
+
+export type ColliderType = 'box' | 'cylinder' | 'cone' | 'sphere' | 'capsule'
 
 interface RigidBodySettingsBase {
     type: ColliderType
@@ -13,6 +14,10 @@ interface RigidBodySettingsBase {
     friction?: number
     margin?: number
     isDynamic?: boolean
+    isKinematic?: boolean,
+    isStatic?: boolean,
+    noContactResponse?: boolean,
+    isCharacter?: boolean
 }
 
 interface ConeRigidBodySettings extends RigidBodySettingsBase {
@@ -20,7 +25,6 @@ interface ConeRigidBodySettings extends RigidBodySettingsBase {
     radius: number
     height: number
 }
-
 
 interface CylinderRigidBodySettings extends RigidBodySettingsBase {
     type: 'cylinder'
@@ -35,6 +39,12 @@ interface BoxRigidBodySettings extends RigidBodySettingsBase {
     sz: number
 }
 
+interface CapsuleRigidBodySettings extends RigidBodySettingsBase {
+    type: 'capsule'
+    radius: number
+    height: number
+}
+
 interface SphereRigidBodySettings extends RigidBodySettingsBase {
     type: 'sphere'
     radius: number
@@ -45,6 +55,7 @@ export type RigidBodySettings =
     | BoxRigidBodySettings
     | CylinderRigidBodySettings
     | ConeRigidBodySettings
+    | CapsuleRigidBodySettings
 
 
 export interface CollisionData {
@@ -55,8 +66,7 @@ export interface CollisionData {
 }
 
 interface CollisionObjectData {
-    object: GameObject,
-    velocity: Ammo.btVector3
+    object: GameObject
     worldPosition: Ammo.btVector3
     localPosition: Ammo.btVector3
 }

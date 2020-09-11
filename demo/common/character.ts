@@ -1,6 +1,8 @@
 import {GameScene} from "../../engine-lib/data";
 import {AnimatedGameObject} from "../../engine-lib/data/AnimatedGameObject";
 import {GameInput} from "../../engine-lib/data/GameInput";
+import {GameState, ServiceLocator} from "../../engine-lib/data/ServiceLocator";
+import {PhysicsEngine} from "../../engine-lib/data/PhysicsEngine";
 
 enum DogState {
     running = 'Dog Armature|running',
@@ -14,6 +16,8 @@ export async function loadCharacter(scene: GameScene) {
     await dog.loadFBX('models/api/Api.fbx');
     dog.object3D.name = 'Main Character'
 
+    dog.tag = 'dog';
+
     dog.scale(2);
     dog.translate(scene.convertWorldPointToTerrainPoint(50, 50));
     dog.rotate(0, Math.PI + Math.PI / 4, 0);
@@ -24,7 +28,41 @@ export async function loadCharacter(scene: GameScene) {
     dog.setTimeScale(DogState.walking, 3);
     dog.playAnimation(state);
 
+    dog.onStart(() => {
+        dog.createRigidBody({
+            type: "sphere",
+            radius: 3,
+            object: dog,
+            mass: 0,
+            isKinematic: false,
+            isDynamic: false,
+            noContactResponse: false,
+            isCharacter: true,
+            isStatic: false
+        });
+    })
+
     dog.onUpdate(() => {
+        const {debug} = ServiceLocator.getService<GameState>('gameState');
+
+        if (debug) {
+            const physics = ServiceLocator.getService<PhysicsEngine>('physics');
+            physics.detectedCollisions.forEach(collision => {
+                if (collision.isOfTags('dog', 'tree')) {
+                    console.log('dog and tree');
+                }
+
+                if (collision.isOfTags('dog', 'ball')) {
+                    console.log('dog and ball');
+                }
+
+                if (collision.isOfTags('dog', 'terrain')) {
+                    console.log('dog and terrain');
+                }
+            })
+
+        }
+
         if (!GameInput.isKeyPressed('KeyW') && state !== DogState.idle) {
             dog.crossFadeAnimationImmediate(state, DogState.idle);
             state = DogState.idle;
