@@ -216,7 +216,7 @@ export class GameObject extends GameCycleEntity {
         this.object3D.translateY(vec3.y)
         this.object3D.translateZ(vec3.z)
 
-        this.translateKinematicCollider();
+        // this.translateKinematicCollider();
     }
 
     private translateKinematicCollider() {
